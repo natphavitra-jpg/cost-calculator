@@ -304,9 +304,15 @@ export default function App(){
             <div style={{background:"#fff",borderRadius:14,padding:"20px 22px",border:"1.5px solid #fed7aa",marginBottom:16}}>
               <div style={{fontWeight:500,fontSize:14,color:"#7c2d12",marginBottom:12}}>เพิ่มวัตถุดิบใหม่ (หมวดใหม่)</div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr",gap:10,marginBottom:10}}>
-                {[["ชื่อวัตถุดิบ","name","text"],["หน่วย","unit","text"],["ราคาต่อแพ็ค (฿)","pricePerPack","number"],["ปริมาณ","packSize","number"],["หมวดหมู่","cat","text"]].map(([l,k,t])=>(
+                {[["ชื่อวัตถุดิบ","name","text"],["ราคาต่อแพ็ค (฿)","pricePerPack","number"],["ปริมาณ","packSize","number"],["หมวดหมู่","cat","text"]].map(([l,k,t])=>(
                   <div key={k}><label style={lbl}>{l}</label><input style={inp} type={t} value={nr[k]} onChange={e=>setNr({...nr,[k]:t==="number"?+e.target.value:e.target.value})}/></div>
                 ))}
+                <div><label style={lbl}>หน่วย</label>
+                  <select style={inp} value={nr.unit} onChange={e=>setNr({...nr,unit:e.target.value})}>
+                    <option value="">-- เลือก --</option>
+                    {["g","kg","ml","l","ชิ้น","ฟอง","ถุง","แพ็ค","ช้อนชา","ช้อนโต๊ะ"].map(u=><option key={u} value={u}>{u}</option>)}
+                  </select>
+                </div>
               </div>
               {nr.packSize>0&&nr.pricePerPack>0&&<div style={{fontSize:12,color:"#D85A30",marginBottom:10,fontWeight:500}}>ราคาต่อ{nr.unit||"หน่วย"}: ฿{(nr.pricePerPack/nr.packSize).toFixed(4)}</div>}
               <div style={{display:"flex",gap:8}}>
@@ -331,9 +337,15 @@ export default function App(){
                 {isAdd&&(
                   <div style={{padding:"14px 20px",borderBottom:`1.5px solid ${sc.border}`,background:sc.bg+"55"}}>
                     <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr",gap:10,marginBottom:10}}>
-                      {[["ชื่อวัตถุดิบ","name","text"],["หน่วย","unit","text"],["ราคาต่อแพ็ค (฿)","pricePerPack","number"],["ปริมาณ","packSize","number"]].map(([l,k,t])=>(
+                      {[["ชื่อวัตถุดิบ","name","text"],["ราคาต่อแพ็ค (฿)","pricePerPack","number"],["ปริมาณ","packSize","number"]].map(([l,k,t])=>(
                         <div key={k}><label style={lbl}>{l}</label><input style={inp} type={t} value={nr[k]} onChange={e=>setNr({...nr,[k]:t==="number"?+e.target.value:e.target.value})}/></div>
                       ))}
+                      <div><label style={lbl}>หน่วย</label>
+                        <select style={inp} value={nr.unit} onChange={e=>setNr({...nr,unit:e.target.value})}>
+                          <option value="">-- เลือก --</option>
+                          {["g","kg","ml","l","ชิ้น","ฟอง","ถุง","แพ็ค","ช้อนชา","ช้อนโต๊ะ"].map(u=><option key={u} value={u}>{u}</option>)}
+                        </select>
+                      </div>
                     </div>
                     {nr.packSize>0&&nr.pricePerPack>0&&<div style={{fontSize:12,color:sc.accent,marginBottom:10,fontWeight:500}}>ราคาต่อ{nr.unit||"หน่วย"}: ฿{(nr.pricePerPack/nr.packSize).toFixed(4)}</div>}
                     <button style={{...btnP,background:sc.accent}} onClick={()=>{if(!nr.name)return;setRms([...rms,{...nr,id:Date.now(),cat}]);setNr({name:"",unit:"",pricePerPack:0,packSize:1,cat:""});setShowAddRm(false);}}>บันทึก</button>
