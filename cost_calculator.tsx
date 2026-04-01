@@ -497,7 +497,10 @@ export default function App(){
                     <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 0",borderBottom:"1px solid #bfdbfe",fontSize:13}}>
                       <span style={{color:"#1e40af"}}>{ing.type==="comp"&&<span style={{background:"#D1FAE5",color:"#065f46",padding:"1px 5px",borderRadius:4,fontSize:10,marginRight:4}}>ผสม</span>}{name} × {ing.amt} {unit}</span>
                       <span style={{color:"#378ADD",fontWeight:500}}>฿{cpu.toFixed(2)}</span>
-                      <button style={{...btnDanger,padding:"2px 8px"}} onClick={()=>setNm({...nm,ings:nm.ings.filter((_,j)=>j!==i)})}>ลบ</button>
+                      <div style={{display:"flex",gap:5}}>
+                        <button style={{...btnSm,padding:"2px 8px"}} onClick={()=>{setNmIng({type:ing.type,id:ing.id,amt:ing.amt});setNm({...nm,ings:nm.ings.filter((_,j)=>j!==i)});}}>แก้ไข</button>
+                        <button style={{...btnDanger,padding:"2px 8px"}} onClick={()=>setNm({...nm,ings:nm.ings.filter((_,j)=>j!==i)})}>ลบ</button>
+                      </div>
                     </div>
                   );
                 })}
