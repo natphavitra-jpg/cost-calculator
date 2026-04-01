@@ -43,9 +43,9 @@ const initFixed=[
 ];
 
 const initBranches=[
-  {id:1,name:"สาขา 1",color:"#7F77DD",menus:initMenus.map(m=>({...m})),fixed:initFixed.map(f=>({...f})),sales:null},
-  {id:2,name:"สาขา 2",color:"#1D9E75",menus:initMenus.map(m=>({...m})),fixed:initFixed.map(f=>({...f})),sales:null},
-  {id:3,name:"สาขา 3",color:"#D85A30",menus:initMenus.map(m=>({...m})),fixed:initFixed.map(f=>({...f})),sales:null},
+  {id:1,name:"สาขา 1",color:"#7F77DD",pin:null,menus:initMenus.map(m=>({...m})),fixed:initFixed.map(f=>({...f})),sales:null},
+  {id:2,name:"สาขา 2",color:"#1D9E75",pin:null,menus:initMenus.map(m=>({...m})),fixed:initFixed.map(f=>({...f})),sales:null},
+  {id:3,name:"สาขา 3",color:"#D85A30",pin:null,menus:initMenus.map(m=>({...m})),fixed:initFixed.map(f=>({...f})),sales:null},
 ];
 
 const today=new Date();
@@ -115,6 +115,10 @@ export default function App(){
   const [activeBranchId,setActiveBranchId]=useState(1);
   const [editBranchId,setEditBranchId]=useState(null);
   const [editBranchName,setEditBranchName]=useState("");
+  const [editBranchPin,setEditBranchPin]=useState("");
+  const [pinModal,setPinModal]=useState(null);
+  const [pinInput,setPinInput]=useState("");
+  const [pinError,setPinError]=useState(false);
 
   const currentBranch=branches.find(b=>b.id===activeBranchId)||branches[0];
   const menus=currentBranch.menus;
@@ -259,15 +263,16 @@ export default function App(){
               {branches.map(b=>(
                 <div key={b.id} style={{display:"flex",alignItems:"center",gap:4}}>
                   {editBranchId===b.id?(
-                    <div style={{display:"flex",gap:4,alignItems:"center"}}>
-                      <input style={{padding:"4px 8px",borderRadius:7,border:"none",fontSize:12,width:90}} value={editBranchName} onChange={e=>setEditBranchName(e.target.value)}/>
-                      <button style={{padding:"4px 8px",borderRadius:7,background:"#fff",border:"none",fontSize:11,cursor:"pointer",color:"#1D9E75",fontWeight:500}} onClick={()=>{setBranches(prev=>prev.map(x=>x.id===b.id?{...x,name:editBranchName}:x));setEditBranchId(null);}}>✓</button>
+                    <div style={{display:"flex",gap:4,alignItems:"center",background:"rgba(0,0,0,.2)",padding:"6px 10px",borderRadius:10}}>
+                      <input placeholder="ชื่อสาขา" style={{padding:"4px 8px",borderRadius:7,border:"none",fontSize:12,width:80}} value={editBranchName} onChange={e=>setEditBranchName(e.target.value)}/>
+                      <input placeholder="PIN (4 หลัก)" maxLength={4} style={{padding:"4px 8px",borderRadius:7,border:"none",fontSize:12,width:80}} value={editBranchPin} onChange={e=>setEditBranchPin(e.target.value.replace(/\D/g,""))}/>
+                      <button style={{padding:"4px 8px",borderRadius:7,background:"#fff",border:"none",fontSize:11,cursor:"pointer",color:"#1D9E75",fontWeight:500}} onClick={()=>{setBranches(prev=>prev.map(x=>x.id===b.id?{...x,name:editBranchName,pin:editBranchPin||null}:x));setEditBranchId(null);}}>✓</button>
                       <button style={{padding:"4px 8px",borderRadius:7,background:"rgba(255,255,255,.2)",border:"none",fontSize:11,cursor:"pointer",color:"#fff"}} onClick={()=>setEditBranchId(null)}>✕</button>
                     </div>
                   ):(
-                    <button onClick={()=>setActiveBranchId(b.id)} style={{display:"flex",alignItems:"center",gap:5,padding:"5px 12px",borderRadius:20,border:`2px solid ${activeBranchId===b.id?"#fff":"rgba(255,255,255,.3)"}`,background:activeBranchId===b.id?"#fff":"rgba(255,255,255,.15)",color:activeBranchId===b.id?tc.color:"#fff",cursor:"pointer",fontSize:12,fontWeight:activeBranchId===b.id?600:400,transition:"all .15s"}}>
-                      🏪 {b.name}
-                      {activeBranchId===b.id&&<span style={{fontSize:10,opacity:.7,cursor:"pointer"}} onClick={e=>{e.stopPropagation();setEditBranchId(b.id);setEditBranchName(b.name);}}>✏️</span>}
+                    <button onClick={()=>{if(b.id===activeBranchId)return;if(b.pin){setPinModal(b.id);setPinInput("");setPinError(false);}else{setActiveBranchId(b.id);}}} style={{display:"flex",alignItems:"center",gap:5,padding:"5px 12px",borderRadius:20,border:`2px solid ${activeBranchId===b.id?"#fff":"rgba(255,255,255,.3)"}`,background:activeBranchId===b.id?"#fff":"rgba(255,255,255,.15)",color:activeBranchId===b.id?tc.color:"#fff",cursor:"pointer",fontSize:12,fontWeight:activeBranchId===b.id?600:400,transition:"all .15s"}}>
+                      {b.pin?"🔒":"🏪"} {b.name}
+                      {activeBranchId===b.id&&<span style={{fontSize:10,opacity:.7,cursor:"pointer"}} onClick={e=>{e.stopPropagation();setEditBranchId(b.id);setEditBranchName(b.name);setEditBranchPin(b.pin||"");}}>✏️</span>}
                     </button>
                   )}
                 </div>
@@ -942,6 +947,25 @@ export default function App(){
 
       </div>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" key="cjs"></script>
+
+      {pinModal&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.55)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000}} onClick={()=>{setPinModal(null);setPinInput("");setPinError(false);}}>
+          <div style={{background:"#fff",borderRadius:20,padding:"32px 36px",width:300,textAlign:"center",boxShadow:"0 20px 60px rgba(0,0,0,.3)"}} onClick={e=>e.stopPropagation()}>
+            <div style={{fontSize:36,marginBottom:8}}>🔒</div>
+            <div style={{fontWeight:600,fontSize:16,color:"#1e293b",marginBottom:4}}>{branches.find(b=>b.id===pinModal)?.name}</div>
+            <div style={{fontSize:12,color:"#64748b",marginBottom:20}}>ใส่รหัส PIN เพื่อเข้าใช้งาน</div>
+            <input autoFocus type="password" inputMode="numeric" maxLength={4} placeholder="● ● ● ●"
+              style={{width:"100%",padding:"12px",borderRadius:10,border:`2px solid ${pinError?"#ef4444":"#e2e8f0"}`,fontSize:22,textAlign:"center",letterSpacing:8,boxSizing:"border-box",outline:"none"}}
+              value={pinInput} onChange={e=>{setPinInput(e.target.value.replace(/\D/g,""));setPinError(false);}}
+              onKeyDown={e=>{if(e.key==="Enter"){const b=branches.find(x=>x.id===pinModal);if(b&&b.pin===pinInput){setActiveBranchId(pinModal);setPinModal(null);setPinInput("");}else{setPinError(true);setPinInput("");}}}}/>
+            {pinError&&<div style={{color:"#ef4444",fontSize:12,marginTop:8}}>รหัสไม่ถูกต้อง ลองใหม่</div>}
+            <div style={{display:"flex",gap:8,marginTop:16}}>
+              <button style={{flex:1,padding:"10px",borderRadius:10,border:"1.5px solid #e2e8f0",background:"#f8fafc",cursor:"pointer",fontSize:13,color:"#64748b"}} onClick={()=>{setPinModal(null);setPinInput("");setPinError(false);}}>ยกเลิก</button>
+              <button style={{flex:1,padding:"10px",borderRadius:10,border:"none",background:"#7F77DD",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:500}} onClick={()=>{const b=branches.find(x=>x.id===pinModal);if(b&&b.pin===pinInput){setActiveBranchId(pinModal);setPinModal(null);setPinInput("");}else{setPinError(true);setPinInput("");;}}}>เข้าใช้งาน</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
