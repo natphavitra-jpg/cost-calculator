@@ -305,7 +305,7 @@ export default function App(){
               <div style={{fontWeight:500,fontSize:14,color:"#7c2d12",marginBottom:12}}>เพิ่มวัตถุดิบใหม่ (หมวดใหม่)</div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr",gap:10,marginBottom:10}}>
                 {[["ชื่อวัตถุดิบ","name","text"],["ราคาต่อแพ็ค (฿)","pricePerPack","number"],["ปริมาณ","packSize","number"],["หมวดหมู่","cat","text"]].map(([l,k,t])=>(
-                  <div key={k}><label style={lbl}>{l}</label><input style={inp} type={t} value={nr[k]} onChange={e=>setNr({...nr,[k]:t==="number"?+e.target.value:e.target.value})}/></div>
+                  <div key={k}><label style={lbl}>{l}</label><input style={inp} type={t} value={t==="number"&&nr[k]===0?"":nr[k]} onChange={e=>setNr({...nr,[k]:t==="number"?+e.target.value:e.target.value})}/></div>
                 ))}
                 <div><label style={lbl}>หน่วย</label>
                   <select style={inp} value={nr.unit} onChange={e=>setNr({...nr,unit:e.target.value})}>
@@ -338,7 +338,7 @@ export default function App(){
                   <div style={{padding:"14px 20px",borderBottom:`1.5px solid ${sc.border}`,background:sc.bg+"55"}}>
                     <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr",gap:10,marginBottom:10}}>
                       {[["ชื่อวัตถุดิบ","name","text"],["ราคาต่อแพ็ค (฿)","pricePerPack","number"],["ปริมาณ","packSize","number"]].map(([l,k,t])=>(
-                        <div key={k}><label style={lbl}>{l}</label><input style={inp} type={t} value={nr[k]} onChange={e=>setNr({...nr,[k]:t==="number"?+e.target.value:e.target.value})}/></div>
+                        <div key={k}><label style={lbl}>{l}</label><input style={inp} type={t} value={t==="number"&&nr[k]===0?"":nr[k]} onChange={e=>setNr({...nr,[k]:t==="number"?+e.target.value:e.target.value})}/></div>
                       ))}
                       <div><label style={lbl}>หน่วย</label>
                         <select style={inp} value={nr.unit} onChange={e=>setNr({...nr,unit:e.target.value})}>
