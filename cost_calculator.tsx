@@ -123,6 +123,8 @@ export default function App(){
   const [nm,setNm]=useState({name:"",cat:"เครื่องดื่ม",price:0,ings:[]});
   const [nmIng,setNmIng]=useState({type:"raw",id:"",amt:0});
   const [editMenuId,setEditMenuId]=useState(null);
+  const [editIngIdx,setEditIngIdx]=useState(null);
+  const [editIngVal,setEditIngVal]=useState({type:"raw",id:"",amt:0});
   const [nf,setNf]=useState({name:"",amt:0,period:"เดือน",icon:"📦"});
   const chartRef=useRef(null);
   const chartInst=useRef(null);
@@ -494,13 +496,30 @@ export default function App(){
                   if(ing.type==="raw"){const r=rms.find(x=>x.id===ing.id);name=r?.name||"?";unit=r?.unit||"";cpu=r?cpuOf(r)*ing.amt:0;}
                   else{const c=comps.find(x=>x.id===ing.id);name=c?.name||"?";unit=c?.unit||"";cpu=c?compCpuOf(c,rms)*ing.amt:0;}
                   return(
-                    <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 0",borderBottom:"1px solid #bfdbfe",fontSize:13}}>
-                      <span style={{color:"#1e40af"}}>{ing.type==="comp"&&<span style={{background:"#D1FAE5",color:"#065f46",padding:"1px 5px",borderRadius:4,fontSize:10,marginRight:4}}>ผสม</span>}{name} × {ing.amt} {unit}</span>
-                      <span style={{color:"#378ADD",fontWeight:500}}>฿{cpu.toFixed(2)}</span>
-                      <div style={{display:"flex",gap:5}}>
-                        <button style={{...btnSm,padding:"2px 8px"}} onClick={()=>{setNmIng({type:ing.type,id:ing.id,amt:ing.amt});setNm({...nm,ings:nm.ings.filter((_,j)=>j!==i)});}}>แก้ไข</button>
-                        <button style={{...btnDanger,padding:"2px 8px"}} onClick={()=>setNm({...nm,ings:nm.ings.filter((_,j)=>j!==i)})}>ลบ</button>
-                      </div>
+                    <div key={i} style={{borderBottom:"1px solid #bfdbfe",padding:"5px 0"}}>
+                      {editIngIdx===i?(
+                        <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
+                          <select style={{...inp,flex:"0 0 100px",fontSize:12}} value={editIngVal.type} onChange={e=>setEditIngVal({...editIngVal,type:e.target.value,id:""})}>
+                            <option value="raw">วัตถุดิบ</option><option value="comp">ของผสม</option>
+                          </select>
+                          <select style={{...inp,flex:1,fontSize:12}} value={editIngVal.id} onChange={e=>setEditIngVal({...editIngVal,id:+e.target.value})}>
+                            <option value="">-- เลือก --</option>
+                            {editIngVal.type==="raw"?rms.map(r=><option key={r.id} value={r.id}>{r.name} (฿{cpuOf(r).toFixed(3)}/{r.unit})</option>):comps.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
+                          </select>
+                          <input style={{...inp,flex:"0 0 80px",fontSize:12}} type="number" value={editIngVal.amt||""} onChange={e=>setEditIngVal({...editIngVal,amt:+e.target.value})}/>
+                          <button style={{...btnSm,fontSize:12,color:"#1D9E75",borderColor:"#9FE1CB"}} onClick={()=>{if(!editIngVal.id||!editIngVal.amt)return;const updated=[...nm.ings];updated[i]={type:editIngVal.type,id:+editIngVal.id,amt:editIngVal.amt};setNm({...nm,ings:updated});setEditIngIdx(null);}}>บันทึก ✓</button>
+                          <button style={{...btnSm,fontSize:12}} onClick={()=>setEditIngIdx(null)}>ยกเลิก</button>
+                        </div>
+                      ):(
+                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:13}}>
+                          <span style={{color:"#1e40af"}}>{ing.type==="comp"&&<span style={{background:"#D1FAE5",color:"#065f46",padding:"1px 5px",borderRadius:4,fontSize:10,marginRight:4}}>ผสม</span>}{name} × {ing.amt} {unit}</span>
+                          <span style={{color:"#378ADD",fontWeight:500}}>฿{cpu.toFixed(2)}</span>
+                          <div style={{display:"flex",gap:5}}>
+                            <button style={{...btnSm,padding:"2px 8px"}} onClick={()=>{setEditIngIdx(i);setEditIngVal({type:ing.type,id:ing.id,amt:ing.amt});}}>แก้ไข</button>
+                            <button style={{...btnDanger,padding:"2px 8px"}} onClick={()=>setNm({...nm,ings:nm.ings.filter((_,j)=>j!==i)})}>ลบ</button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
