@@ -251,7 +251,7 @@ export default function App(){
     <div style={{fontFamily:"var(--font-sans)",background:"#f8f7ff",minHeight:"100vh",padding:"0 0 3rem"}}>
       <div style={{background:tc.color,padding:"18px 24px 0",transition:"background .3s"}}>
         <div style={{maxWidth:1160,margin:"0 auto"}}>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
             <div style={{display:"flex",alignItems:"center",gap:10}}>
               <div style={{width:36,height:36,borderRadius:10,background:"rgba(255,255,255,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>☕</div>
               <div>
@@ -259,26 +259,26 @@ export default function App(){
                 <div style={{fontSize:12,color:"rgba(255,255,255,.7)"}}>วัตถุดิบ → ของผสม → เมนู → ต้นทุน</div>
               </div>
             </div>
-            <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
-              {branches.map(b=>(
-                <div key={b.id} style={{display:"flex",alignItems:"center",gap:4}}>
-                  {editBranchId===b.id?(
-                    <div style={{display:"flex",gap:4,alignItems:"center",background:"rgba(0,0,0,.2)",padding:"6px 10px",borderRadius:10}}>
-                      <input placeholder="ชื่อสาขา" style={{padding:"4px 8px",borderRadius:7,border:"none",fontSize:12,width:80}} value={editBranchName} onChange={e=>setEditBranchName(e.target.value)}/>
-                      <input placeholder="PIN (4 หลัก)" maxLength={4} style={{padding:"4px 8px",borderRadius:7,border:"none",fontSize:12,width:80}} value={editBranchPin} onChange={e=>setEditBranchPin(e.target.value.replace(/\D/g,""))}/>
-                      <button style={{padding:"4px 8px",borderRadius:7,background:"#fff",border:"none",fontSize:11,cursor:"pointer",color:"#1D9E75",fontWeight:500}} onClick={()=>{setBranches(prev=>prev.map(x=>x.id===b.id?{...x,name:editBranchName,pin:editBranchPin||null}:x));setEditBranchId(null);}}>✓</button>
-                      <button style={{padding:"4px 8px",borderRadius:7,background:"rgba(255,255,255,.2)",border:"none",fontSize:11,cursor:"pointer",color:"#fff"}} onClick={()=>setEditBranchId(null)}>✕</button>
-                    </div>
-                  ):(
-                    <button onClick={()=>{if(b.id===activeBranchId)return;if(b.pin){setPinModal(b.id);setPinInput("");setPinError(false);}else{setActiveBranchId(b.id);}}} style={{display:"flex",alignItems:"center",gap:5,padding:"5px 12px",borderRadius:20,border:`2px solid ${activeBranchId===b.id?"#fff":"rgba(255,255,255,.3)"}`,background:activeBranchId===b.id?"#fff":"rgba(255,255,255,.15)",color:activeBranchId===b.id?tc.color:"#fff",cursor:"pointer",fontSize:12,fontWeight:activeBranchId===b.id?600:400,transition:"all .15s"}}>
-                      {b.pin?"🔒":"🏪"} {b.name}
-                      {activeBranchId===b.id&&<span style={{fontSize:10,opacity:.7,cursor:"pointer"}} onClick={e=>{e.stopPropagation();setEditBranchId(b.id);setEditBranchName(b.name);setEditBranchPin(b.pin||"");}}>✏️</span>}
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button onClick={()=>{const id=Date.now();setBranches(prev=>[...prev,{id,name:`สาขา ${prev.length+1}`,color:"#7F77DD",menus:initMenus.map(m=>({...m})),fixed:initFixed.map(f=>({...f})),sales:genSampleSales()}]);setActiveBranchId(id);}} style={{padding:"5px 10px",borderRadius:20,border:"2px dashed rgba(255,255,255,.4)",background:"transparent",color:"rgba(255,255,255,.8)",cursor:"pointer",fontSize:12}}>+ สาขา</button>
-            </div>
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:12,flexWrap:"wrap"}}>
+            <span style={{fontSize:11,color:"rgba(255,255,255,.6)",marginRight:4}}>เลือกสาขา:</span>
+            {branches.map(b=>(
+              <div key={b.id}>
+                {editBranchId===b.id?(
+                  <div style={{display:"flex",gap:4,alignItems:"center",background:"rgba(0,0,0,.25)",padding:"5px 10px",borderRadius:10}}>
+                    <input placeholder="ชื่อสาขา" style={{padding:"4px 8px",borderRadius:7,border:"none",fontSize:12,width:80}} value={editBranchName} onChange={e=>setEditBranchName(e.target.value)}/>
+                    <input placeholder="PIN 4 หลัก" maxLength={4} style={{padding:"4px 8px",borderRadius:7,border:"none",fontSize:12,width:80}} value={editBranchPin} onChange={e=>setEditBranchPin(e.target.value.replace(/\D/g,""))}/>
+                    <button style={{padding:"4px 8px",borderRadius:7,background:"#fff",border:"none",fontSize:11,cursor:"pointer",color:"#1D9E75",fontWeight:600}} onClick={()=>{setBranches(prev=>prev.map(x=>x.id===b.id?{...x,name:editBranchName,pin:editBranchPin||null}:x));setEditBranchId(null);}}>✓</button>
+                    <button style={{padding:"4px 8px",borderRadius:7,background:"rgba(255,255,255,.2)",border:"none",fontSize:11,cursor:"pointer",color:"#fff"}} onClick={()=>setEditBranchId(null)}>✕</button>
+                  </div>
+                ):(
+                  <button onClick={()=>{if(b.id===activeBranchId){setEditBranchId(b.id);setEditBranchName(b.name);setEditBranchPin(b.pin||"");}else if(b.pin){setPinModal(b.id);setPinInput("");setPinError(false);}else{setActiveBranchId(b.id);}}} style={{display:"flex",alignItems:"center",gap:5,padding:"6px 14px",borderRadius:20,border:`2px solid ${activeBranchId===b.id?"#fff":"rgba(255,255,255,.35)"}`,background:activeBranchId===b.id?"rgba(255,255,255,.95)":"rgba(255,255,255,.12)",color:activeBranchId===b.id?tc.color:"#fff",cursor:"pointer",fontSize:12,fontWeight:activeBranchId===b.id?600:400,transition:"all .15s"}}>
+                    {b.pin?"🔒":"🏪"} {b.name}{activeBranchId===b.id&&<span style={{fontSize:10,opacity:.6}}> ✏️</span>}
+                  </button>
+                )}
+              </div>
+            ))}
+            <button onClick={()=>{const id=Date.now();setBranches(prev=>[...prev,{id,name:`สาขา ${prev.length+1}`,pin:null,menus:initMenus.map(m=>({...m})),fixed:initFixed.map(f=>({...f})),sales:genSampleSales()}]);setActiveBranchId(id);}} style={{padding:"6px 12px",borderRadius:20,border:"2px dashed rgba(255,255,255,.5)",background:"transparent",color:"rgba(255,255,255,.85)",cursor:"pointer",fontSize:12}}>+ สาขา</button>
           </div>
           <div style={{display:"flex",gap:2,overflowX:"auto"}}>
             {TABS.map(t=>(
