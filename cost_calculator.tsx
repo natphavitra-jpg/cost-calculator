@@ -148,6 +148,7 @@ export default function App(){
   const [nr,setNr]=useState({name:"",unit:"",pricePerPack:0,packSize:1,cat:""});
   const [nc,setNc]=useState({name:"",unit:"",yield:0,cat:"โฮมเมด",ings:[]});
   const [ncIng,setNcIng]=useState({rmId:"",amt:0});
+  const [editCompId,setEditCompId]=useState(null);
   const [nm,setNm]=useState({name:"",cat:"เครื่องดื่ม",price:0,ings:[]});
   const [nmIng,setNmIng]=useState({type:"raw",id:"",amt:0});
   const [editMenuId,setEditMenuId]=useState(null);
@@ -446,7 +447,7 @@ export default function App(){
           </div>
           {showAddComp&&(
             <div style={{background:"#fff",borderRadius:14,padding:"20px 22px",border:"1.5px solid #9FE1CB",marginBottom:16}}>
-              <div style={{fontWeight:500,fontSize:14,color:"#064e3b",marginBottom:12}}>เพิ่มของผสมใหม่</div>
+              <div style={{fontWeight:500,fontSize:14,color:"#064e3b",marginBottom:12}}>{editCompId?"✏️ แก้ไขของผสม":"เพิ่มของผสมใหม่"}</div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:10,marginBottom:12}}>
                 {[["ชื่อของผสม","name","text"],["หน่วย","unit","text"],["ผลผลิต (หน่วย)","yield","number"],["หมวดหมู่","cat","text"]].map(([l,k,t])=>(
                   <div key={k}><label style={lbl}>{l}</label><input style={inp} type={t} value={nc[k]} onChange={e=>setNc({...nc,[k]:t==="number"?+e.target.value:e.target.value})}/></div>
@@ -474,8 +475,13 @@ export default function App(){
               </div>
               {nc.ings.length>0&&nc.yield>0&&<div style={{fontSize:13,color:"#1D9E75",fontWeight:500,marginBottom:12}}>ราคาต่อ{nc.unit||"หน่วย"}: ฿{compCpuOf(nc,rms).toFixed(4)}</div>}
               <div style={{display:"flex",gap:8}}>
-                <button style={btnP} onClick={()=>{if(!nc.name||nc.yield<=0)return;setComps([...comps,{...nc,id:Date.now()}]);setNc({name:"",unit:"",yield:0,cat:"โฮมเมด",ings:[]});setShowAddComp(false);}}>บันทึก</button>
-                <button style={btnSm} onClick={()=>setShowAddComp(false)}>ยกเลิก</button>
+                <button style={btnP} onClick={()=>{
+                  if(!nc.name||nc.yield<=0)return;
+                  if(editCompId){setComps(comps.map(c=>c.id===editCompId?{...nc,id:editCompId}:c));setEditCompId(null);}
+                  else{setComps([...comps,{...nc,id:Date.now()}]);}
+                  setNc({name:"",unit:"",yield:0,cat:"โฮมเมด",ings:[]});setNcIng({rmId:"",amt:0});setShowAddComp(false);
+                }}>{editCompId?"อัปเดต":"บันทึก"}</button>
+                <button style={btnSm} onClick={()=>{setShowAddComp(false);setEditCompId(null);setNc({name:"",unit:"",yield:0,cat:"โฮมเมด",ings:[]});}}>ยกเลิก</button>
               </div>
             </div>
           )}
@@ -503,9 +509,13 @@ export default function App(){
                       </div>
                     );})}
                   </div>
-                  <div style={{padding:"10px 18px",background:"#fafafa",display:"flex",justifyContent:"space-between",fontSize:12,color:"#475569"}}>
+                  <div style={{padding:"10px 18px",background:"#fafafa",display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:12,color:"#475569"}}>
                     <span>ต้นทุนรวม: <b style={{color:sc.accent}}>฿{totalCost.toFixed(2)}</b></span>
                     <span>ผลผลิต: <b style={{color:sc.accent}}>{fmt(comp.yield,0)} {comp.unit}</b></span>
+                  </div>
+                  <div style={{padding:"8px 18px",borderTop:"1px solid #f1f5f9",display:"flex",gap:8,justifyContent:"flex-end"}}>
+                    <button style={btnSm} onClick={()=>{setEditCompId(comp.id);setNc({name:comp.name,unit:comp.unit,yield:comp.yield,cat:comp.cat,ings:comp.ings.map(i=>({...i}))});setNcIng({rmId:"",amt:0});setShowAddComp(true);window.scrollTo({top:0,behavior:"smooth"});}}>✏️ แก้ไข</button>
+                    <button style={btnDanger} onClick={()=>setComps(comps.filter(x=>x.id!==comp.id))}>ลบ</button>
                   </div>
                 </div>
               );
