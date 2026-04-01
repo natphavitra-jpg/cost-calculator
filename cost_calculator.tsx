@@ -42,6 +42,12 @@ const initFixed=[
   {id:6,name:"ค่าเสื่อมอุปกรณ์",amt:1000,period:"เดือน",icon:"🔧"},
 ];
 
+const initBranches=[
+  {id:1,name:"สาขา 1",color:"#7F77DD",menus:initMenus.map(m=>({...m})),fixed:initFixed.map(f=>({...f})),sales:null},
+  {id:2,name:"สาขา 2",color:"#1D9E75",menus:initMenus.map(m=>({...m})),fixed:initFixed.map(f=>({...f})),sales:null},
+  {id:3,name:"สาขา 3",color:"#D85A30",menus:initMenus.map(m=>({...m})),fixed:initFixed.map(f=>({...f})),sales:null},
+];
+
 const today=new Date();
 const toKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 const toMonthKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
@@ -105,9 +111,20 @@ export default function App(){
   const [tab,setTab]=useState(0);
   const [rms,setRms]=useState(initRaw);
   const [comps,setComps]=useState(initComps);
-  const [menus,setMenus]=useState(initMenus);
-  const [fixed,setFixed]=useState(initFixed);
-  const [salesData,setSalesData]=useState(genSampleSales);
+  const [branches,setBranches]=useState(()=>initBranches.map(b=>({...b,sales:genSampleSales()})));
+  const [activeBranchId,setActiveBranchId]=useState(1);
+  const [editBranchId,setEditBranchId]=useState(null);
+  const [editBranchName,setEditBranchName]=useState("");
+
+  const currentBranch=branches.find(b=>b.id===activeBranchId)||branches[0];
+  const menus=currentBranch.menus;
+  const fixed=currentBranch.fixed;
+  const salesData=currentBranch.sales;
+
+  const _upBranch=(field,val)=>setBranches(prev=>prev.map(b=>b.id===activeBranchId?{...b,[field]:typeof val==="function"?val(b[field]):val}:b));
+  const setMenus=(v)=>_upBranch("menus",v);
+  const setFixed=(v)=>_upBranch("fixed",v);
+  const setSalesData=(v)=>_upBranch("sales",v);
   const [selectedDate,setSelectedDate]=useState(todayKey);
   const [viewMonth,setViewMonth]=useState(toMonthKey(today));
   const [historyView,setHistoryView]=useState("month");
@@ -134,7 +151,7 @@ export default function App(){
   const fixedPD=fixed.reduce((s,f)=>s+(f.period==="วัน"?f.amt:f.period==="เดือน"?f.amt/30:f.amt/365),0);
 
   const getDaySales=key=>salesData[key]||{};
-  const setDaySales=(key,mid,qty)=>setSalesData(prev=>({...prev,[key]:{...(prev[key]||{}),[mid]:qty}}));
+  const setDaySales=(key,mid,qty)=>_upBranch("sales",prev=>({...prev,[key]:{...(prev[key]||{}),[mid]:qty}}));
 
   const calcDayStats=(key)=>{
     const ds=getDaySales(key);
@@ -237,6 +254,25 @@ export default function App(){
                 <div style={{fontSize:17,fontWeight:500,color:"#fff"}}>ระบบต้นทุนร้านเครื่องดื่ม & เบเกอรี่</div>
                 <div style={{fontSize:12,color:"rgba(255,255,255,.7)"}}>วัตถุดิบ → ของผสม → เมนู → ต้นทุน</div>
               </div>
+            </div>
+            <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
+              {branches.map(b=>(
+                <div key={b.id} style={{display:"flex",alignItems:"center",gap:4}}>
+                  {editBranchId===b.id?(
+                    <div style={{display:"flex",gap:4,alignItems:"center"}}>
+                      <input style={{padding:"4px 8px",borderRadius:7,border:"none",fontSize:12,width:90}} value={editBranchName} onChange={e=>setEditBranchName(e.target.value)}/>
+                      <button style={{padding:"4px 8px",borderRadius:7,background:"#fff",border:"none",fontSize:11,cursor:"pointer",color:"#1D9E75",fontWeight:500}} onClick={()=>{setBranches(prev=>prev.map(x=>x.id===b.id?{...x,name:editBranchName}:x));setEditBranchId(null);}}>✓</button>
+                      <button style={{padding:"4px 8px",borderRadius:7,background:"rgba(255,255,255,.2)",border:"none",fontSize:11,cursor:"pointer",color:"#fff"}} onClick={()=>setEditBranchId(null)}>✕</button>
+                    </div>
+                  ):(
+                    <button onClick={()=>setActiveBranchId(b.id)} style={{display:"flex",alignItems:"center",gap:5,padding:"5px 12px",borderRadius:20,border:`2px solid ${activeBranchId===b.id?"#fff":"rgba(255,255,255,.3)"}`,background:activeBranchId===b.id?"#fff":"rgba(255,255,255,.15)",color:activeBranchId===b.id?tc.color:"#fff",cursor:"pointer",fontSize:12,fontWeight:activeBranchId===b.id?600:400,transition:"all .15s"}}>
+                      🏪 {b.name}
+                      {activeBranchId===b.id&&<span style={{fontSize:10,opacity:.7,cursor:"pointer"}} onClick={e=>{e.stopPropagation();setEditBranchId(b.id);setEditBranchName(b.name);}}>✏️</span>}
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button onClick={()=>{const id=Date.now();setBranches(prev=>[...prev,{id,name:`สาขา ${prev.length+1}`,color:"#7F77DD",menus:initMenus.map(m=>({...m})),fixed:initFixed.map(f=>({...f})),sales:genSampleSales()}]);setActiveBranchId(id);}} style={{padding:"5px 10px",borderRadius:20,border:"2px dashed rgba(255,255,255,.4)",background:"transparent",color:"rgba(255,255,255,.8)",cursor:"pointer",fontSize:12}}>+ สาขา</button>
             </div>
           </div>
           <div style={{display:"flex",gap:2,overflowX:"auto"}}>
