@@ -122,6 +122,7 @@ export default function App(){
   const [ncIng,setNcIng]=useState({rmId:"",amt:0});
   const [nm,setNm]=useState({name:"",cat:"เครื่องดื่ม",price:0,ings:[]});
   const [nmIng,setNmIng]=useState({type:"raw",id:"",amt:0});
+  const [editMenuId,setEditMenuId]=useState(null);
   const [nf,setNf]=useState({name:"",amt:0,period:"เดือน",icon:"📦"});
   const chartRef=useRef(null);
   const chartInst=useRef(null);
@@ -477,7 +478,7 @@ export default function App(){
           </div>
           {showAddMenu&&(
             <div style={{background:"#fff",borderRadius:14,padding:"20px 22px",border:"1.5px solid #bfdbfe",marginBottom:16}}>
-              <div style={{fontWeight:500,fontSize:14,color:"#1e3a5f",marginBottom:12}}>เพิ่มเมนูใหม่</div>
+              <div style={{fontWeight:500,fontSize:14,color:"#1e3a5f",marginBottom:12}}>{editMenuId?"✏️ แก้ไขเมนู":"เพิ่มเมนูใหม่"}</div>
               <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr",gap:10,marginBottom:14}}>
                 <div><label style={lbl}>ชื่อเมนู</label><input style={inp} value={nm.name} onChange={e=>setNm({...nm,name:e.target.value})}/></div>
                 <div><label style={lbl}>ประเภท</label>
@@ -528,8 +529,13 @@ export default function App(){
                 {nm.price>0&&` · Margin: ${pct(Math.max(0,(nm.price-nm.ings.reduce((s,i)=>{if(i.type==="raw"){const r=rms.find(x=>x.id===i.id);return s+(r?cpuOf(r)*i.amt:0);}const c=comps.find(x=>x.id===i.id);return s+(c?compCpuOf(c,rms)*i.amt:0);},0))/nm.price))}`}
               </div>}
               <div style={{display:"flex",gap:8}}>
-                <button style={btnP} onClick={()=>{if(!nm.name||nm.price<=0)return;setMenus([...menus,{...nm,id:Date.now()}]);setNm({name:"",cat:"เครื่องดื่ม",price:0,ings:[]});setNmIng({type:"raw",id:"",amt:0});setShowAddMenu(false);}}>บันทึกเมนู</button>
-                <button style={btnSm} onClick={()=>setShowAddMenu(false)}>ยกเลิก</button>
+                <button style={btnP} onClick={()=>{
+                  if(!nm.name||nm.price<=0)return;
+                  if(editMenuId){setMenus(menus.map(m=>m.id===editMenuId?{...nm,id:editMenuId}:m));setEditMenuId(null);}
+                  else{setMenus([...menus,{...nm,id:Date.now()}]);}
+                  setNm({name:"",cat:"เครื่องดื่ม",price:0,ings:[]});setNmIng({type:"raw",id:"",amt:0});setShowAddMenu(false);
+                }}>{editMenuId?"อัปเดตเมนู":"บันทึกเมนู"}</button>
+                <button style={btnSm} onClick={()=>{setShowAddMenu(false);setEditMenuId(null);setNm({name:"",cat:"เครื่องดื่ม",price:0,ings:[]});}}>ยกเลิก</button>
               </div>
             </div>
           )}
@@ -567,6 +573,10 @@ export default function App(){
                     <div><div style={{fontSize:11,color:"#64748b"}}>ต้นทุนวัตถุดิบ</div><div style={{fontWeight:500,fontSize:17,color:"#1e293b"}}>฿{cost.toFixed(2)}</div></div>
                     <div style={{textAlign:"center"}}><Ring p={gm*100} color={mColor(gm)}/><div style={{fontSize:10,color:mColor(gm),fontWeight:500,marginTop:2}}>{mLabel(gm)}</div></div>
                     <div style={{textAlign:"right"}}><div style={{fontSize:11,color:"#64748b"}}>Gross Margin</div><div style={{fontWeight:500,fontSize:20,color:mColor(gm)}}>{pct(gm)}</div></div>
+                  </div>
+                  <div style={{padding:"10px 18px",borderTop:"1px solid #f1f5f9",display:"flex",gap:8,justifyContent:"flex-end"}}>
+                    <button style={btnSm} onClick={()=>{setEditMenuId(menu.id);setNm({name:menu.name,cat:menu.cat,price:menu.price,ings:menu.ings.map(i=>({...i}))});setNmIng({type:"raw",id:"",amt:0});setShowAddMenu(true);window.scrollTo({top:0,behavior:"smooth"});}}>✏️ แก้ไข</button>
+                    <button style={btnDanger} onClick={()=>setMenus(menus.filter(x=>x.id!==menu.id))}>ลบ</button>
                   </div>
                 </div>
               );
