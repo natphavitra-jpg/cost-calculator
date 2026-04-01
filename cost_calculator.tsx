@@ -128,6 +128,8 @@ export default function App(){
   const [nf,setNf]=useState({name:"",amt:0,period:"เดือน",icon:"📦"});
   const chartRef=useRef(null);
   const chartInst=useRef(null);
+  const [pdfLoading,setPdfLoading]=useState(false);
+  const [pdfMsg,setPdfMsg]=useState("");
 
   const fixedPD=fixed.reduce((s,f)=>s+(f.period==="วัน"?f.amt:f.period==="เดือน"?f.amt/30:f.amt/365),0);
 
@@ -647,9 +649,38 @@ export default function App(){
                 ))}
               </div>
               <div style={{background:"#fff",borderRadius:14,overflow:"hidden",border:"1.5px solid #c7d2fe"}}>
-                <div style={{background:"#EEF2FF",padding:"12px 16px",display:"flex",alignItems:"center",gap:8}}>
-                  <span style={{fontWeight:500,fontSize:13,color:"#3730a3"}}>บันทึกยอดขาย</span>
-                  <span style={{fontSize:11,color:"#6366f1"}}>{formatDateTH(selectedDate)}</span>
+                <div style={{background:"#EEF2FF",padding:"12px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <span style={{fontWeight:500,fontSize:13,color:"#3730a3"}}>บันทึกยอดขาย</span>
+                    <span style={{fontSize:11,color:"#6366f1"}}>{formatDateTH(selectedDate)}</span>
+                  </div>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    {pdfMsg&&<span style={{fontSize:11,color:pdfMsg.startsWith("✅")?"#1D9E75":"#E24B4A"}}>{pdfMsg}</span>}
+                    <label style={{padding:"6px 14px",borderRadius:8,background:"#7F77DD",color:"#fff",fontSize:12,fontWeight:500,cursor:pdfLoading?"not-allowed":"pointer",opacity:pdfLoading?0.6:1,display:"flex",alignItems:"center",gap:5}}>
+                      {pdfLoading?"⏳ กำลังอ่าน PDF...":"📄 อัปโหลด PDF ยอดขาย"}
+                      <input type="file" accept=".pdf" style={{display:"none"}} disabled={pdfLoading} onChange={async e=>{
+                        const file=e.target.files?.[0];
+                        if(!file)return;
+                        setPdfLoading(true);setPdfMsg("");
+                        try{
+                          const fd=new FormData();
+                          fd.append("file",file);
+                          fd.append("menuNames",menus.map(m=>m.name).join(", "));
+                          const res=await fetch("/api/parse-pdf",{method:"POST",body:fd});
+                          const data=await res.json();
+                          if(data.error){setPdfMsg("❌ "+data.error);return;}
+                          let count=0;
+                          menus.forEach(m=>{
+                            if(data[m.name]!==undefined&&data[m.name]>0){
+                              setDaySales(selectedDate,m.id,data[m.name]);count++;
+                            }
+                          });
+                          setPdfMsg(`✅ กรอกแล้ว ${count} เมนู`);
+                        }catch(err){setPdfMsg("❌ เกิดข้อผิดพลาด");}
+                        finally{setPdfLoading(false);e.target.value="";}
+                      }}/>
+                    </label>
+                  </div>
                 </div>
                 <table style={{width:"100%",borderCollapse:"collapse"}}>
                   <thead><tr style={{background:"#f8f9ff"}}>
