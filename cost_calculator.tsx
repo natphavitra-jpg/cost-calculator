@@ -42,10 +42,15 @@ const initFixed=[
   {id:6,name:"ค่าเสื่อมอุปกรณ์",amt:1000,period:"เดือน",icon:"🔧"},
 ];
 
+const deepCloneMenus=()=>initMenus.map(m=>({...m,ings:m.ings.map(i=>({...i}))}));
+const deepCloneRms=()=>initRaw.map(r=>({...r}));
+const deepCloneComps=()=>initComps.map(c=>({...c,ings:c.ings.map(i=>({...i}))}));
+const deepCloneFixed=()=>initFixed.map(f=>({...f}));
+
 const initBranches=[
-  {id:1,name:"สาขา 1",color:"#7F77DD",pin:null,menus:initMenus.map(m=>({...m})),fixed:initFixed.map(f=>({...f})),sales:null},
-  {id:2,name:"สาขา 2",color:"#1D9E75",pin:null,menus:initMenus.map(m=>({...m})),fixed:initFixed.map(f=>({...f})),sales:null},
-  {id:3,name:"สาขา 3",color:"#D85A30",pin:null,menus:initMenus.map(m=>({...m})),fixed:initFixed.map(f=>({...f})),sales:null},
+  {id:1,name:"สาขา 1",color:"#7F77DD",pin:null,rms:deepCloneRms(),comps:deepCloneComps(),menus:deepCloneMenus(),fixed:deepCloneFixed(),sales:null},
+  {id:2,name:"สาขา 2",color:"#1D9E75",pin:null,rms:deepCloneRms(),comps:deepCloneComps(),menus:deepCloneMenus(),fixed:deepCloneFixed(),sales:null},
+  {id:3,name:"สาขา 3",color:"#D85A30",pin:null,rms:deepCloneRms(),comps:deepCloneComps(),menus:deepCloneMenus(),fixed:deepCloneFixed(),sales:null},
 ];
 
 const today=new Date();
@@ -109,8 +114,6 @@ function MBar({v,max=1,color,h=6}){
 
 export default function App(){
   const [tab,setTab]=useState(0);
-  const [rms,setRms]=useState(initRaw);
-  const [comps,setComps]=useState(initComps);
   const [branches,setBranches]=useState(()=>initBranches.map(b=>({...b,sales:genSampleSales()})));
   const [activeBranchId,setActiveBranchId]=useState(1);
   const [editBranchId,setEditBranchId]=useState(null);
@@ -121,11 +124,15 @@ export default function App(){
   const [pinError,setPinError]=useState(false);
 
   const currentBranch=branches.find(b=>b.id===activeBranchId)||branches[0];
+  const rms=currentBranch.rms;
+  const comps=currentBranch.comps;
   const menus=currentBranch.menus;
   const fixed=currentBranch.fixed;
   const salesData=currentBranch.sales;
 
   const _upBranch=(field,val)=>setBranches(prev=>prev.map(b=>b.id===activeBranchId?{...b,[field]:typeof val==="function"?val(b[field]):val}:b));
+  const setRms=(v)=>_upBranch("rms",v);
+  const setComps=(v)=>_upBranch("comps",v);
   const setMenus=(v)=>_upBranch("menus",v);
   const setFixed=(v)=>_upBranch("fixed",v);
   const setSalesData=(v)=>_upBranch("sales",v);
@@ -278,7 +285,7 @@ export default function App(){
                 )}
               </div>
             ))}
-            <button onClick={()=>{const id=Date.now();setBranches(prev=>[...prev,{id,name:`สาขา ${prev.length+1}`,pin:null,menus:initMenus.map(m=>({...m})),fixed:initFixed.map(f=>({...f})),sales:genSampleSales()}]);setActiveBranchId(id);}} style={{padding:"6px 12px",borderRadius:20,border:"2px dashed rgba(255,255,255,.5)",background:"transparent",color:"rgba(255,255,255,.85)",cursor:"pointer",fontSize:12}}>+ สาขา</button>
+            <button onClick={()=>{const id=Date.now();setBranches(prev=>[...prev,{id,name:`สาขา ${prev.length+1}`,pin:null,rms:deepCloneRms(),comps:deepCloneComps(),menus:deepCloneMenus(),fixed:deepCloneFixed(),sales:genSampleSales()}]);setActiveBranchId(id);}} style={{padding:"6px 12px",borderRadius:20,border:"2px dashed rgba(255,255,255,.5)",background:"transparent",color:"rgba(255,255,255,.85)",cursor:"pointer",fontSize:12}}>+ สาขา</button>
           </div>
           <div style={{display:"flex",gap:2,overflowX:"auto"}}>
             {TABS.map(t=>(
