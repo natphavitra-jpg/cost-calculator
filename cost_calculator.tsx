@@ -179,6 +179,7 @@ const TABS=[
   {id:3,label:"สูตรเมนู",emoji:"📋",color:"#378ADD"},
   {id:4,label:"ต้นทุน & Margin",emoji:"💰",color:"#7F77DD"},
   {id:5,label:"Fixed Cost",emoji:"📌",color:"#BA7517"},
+  {id:6,label:"สต๊อก",emoji:"📦",color:"#0F6E56"},
 ];
 
 const fmt=(n,d=0)=>Number(n).toLocaleString("th-TH",{minimumFractionDigits:d,maximumFractionDigits:d});
@@ -257,6 +258,48 @@ export default function App(){
   const setMenus=(v)=>_upBranch("menus",v);
   const setFixed=(v)=>_upBranch("fixed",v);
   const setSalesData=(v)=>_upBranch("sales",v);
+  const setStock=(v)=>_upBranch("stock",v);
+  const setStockMin=(v)=>_upBranch("stockMin",v);
+  const setStockDeducted=(v)=>_upBranch("stockDeducted",v);
+  const stock=currentBranch.stock||{};
+  const stockMin=currentBranch.stockMin||{};
+  const stockDeducted=currentBranch.stockDeducted||{};
+
+  // คำนวณวัตถุดิบที่ใช้ต่อวัน (รวม compound → raw)
+  const calcDailyUsage=(dateKey)=>{
+    const daySales=salesData[dateKey]||{};
+    const usage:{[id:number]:number}={};
+    menus.forEach(m=>{
+      const qty=daySales[m.id]||0;
+      if(!qty)return;
+      m.ings.forEach(i=>{
+        if(i.type==="raw"){
+          usage[i.id]=(usage[i.id]||0)+i.amt*qty;
+        } else {
+          const c=comps.find(x=>x.id===i.id);
+          if(!c||!c.yield)return;
+          c.ings.forEach(ci=>{
+            usage[ci.rmId]=(usage[ci.rmId]||0)+(ci.amt/c.yield)*i.amt*qty;
+          });
+        }
+      });
+    });
+    return usage;
+  };
+
+  const deductStockForDate=(dateKey)=>{
+    if(stockDeducted[dateKey])return;
+    const usage=calcDailyUsage(dateKey);
+    setStock((prev:any)=>{
+      const next={...prev};
+      Object.entries(usage).forEach(([id,amt])=>{
+        next[id]=(next[id]||0)-amt;
+      });
+      return next;
+    });
+    setStockDeducted((prev:any)=>({...prev,[dateKey]:true}));
+  };
+
   const [selectedDate,setSelectedDate]=useState(todayKey);
   const [viewMonth,setViewMonth]=useState(toMonthKey(today));
   const [historyView,setHistoryView]=useState("month");
@@ -461,7 +504,7 @@ export default function App(){
                 )}
               </div>
             ))}
-            <button onClick={()=>{const id=Date.now();setBranches(prev=>[...prev,{id,name:`สาขา ${prev.length+1}`,pin:null,rms:deepCloneRms(),comps:deepCloneComps(),menus:deepCloneMenus(),fixed:deepCloneFixed(),sales:genSampleSales()}]);setActiveBranchId(id);}} style={{padding:"6px 12px",borderRadius:20,border:"2px dashed rgba(255,255,255,.5)",background:"transparent",color:"rgba(255,255,255,.85)",cursor:"pointer",fontSize:12}}>+ สาขา</button>
+            <button onClick={()=>{const id=Date.now();setBranches(prev=>[...prev,{id,name:`สาขา ${prev.length+1}`,pin:null,rms:deepCloneRms(),comps:deepCloneComps(),menus:deepCloneMenus(),fixed:deepCloneFixed(),sales:genSampleSales(),stock:{},stockMin:{},stockDeducted:{}}]);setActiveBranchId(id);}} style={{padding:"6px 12px",borderRadius:20,border:"2px dashed rgba(255,255,255,.5)",background:"transparent",color:"rgba(255,255,255,.85)",cursor:"pointer",fontSize:12}}>+ สาขา</button>
           </div>
           <div style={{display:"flex",gap:2,overflowX:"auto"}}>
             {TABS.map(t=>(
@@ -1136,6 +1179,120 @@ export default function App(){
           </div>
         </div>
       )}
+
+      {tab===6&&(()=>{
+        const [stockDate,setStockDate]=useState(todayKey);
+        const [stockCatF,setStockCatF]=useState("ทั้งหมด");
+        const [editStockId,setEditStockId]=useState(null);
+        const [addAmt,setAddAmt]=useState(0);
+        const usage=calcDailyUsage(stockDate);
+        const rmCatsAll=["ทั้งหมด",...Array.from(new Set(rms.map(r=>r.cat)))];
+        const filteredRms=rms.filter(r=>stockCatF==="ทั้งหมด"||r.cat===stockCatF);
+        const lowCount=rms.filter(r=>stockMin[r.id]&&(stock[r.id]||0)<stockMin[r.id]).length;
+        const outCount=rms.filter(r=>(stock[r.id]||0)<=0&&stockMin[r.id]).length;
+        const todayUsage=calcDailyUsage(stockDate);
+        const alreadyDeducted=!!stockDeducted[stockDate];
+        return(
+          <div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16,flexWrap:"wrap",gap:12}}>
+              <div>
+                <div style={{fontWeight:500,fontSize:15,color:"#0F6E56"}}>📦 จัดการสต๊อกวัตถุดิบ</div>
+                <div style={{fontSize:12,color:"#64748b",marginTop:2}}>ตั้งจำนวนสต๊อก → ยืนยันยอดขาย → ระบบตัดสต๊อกอัตโนมัติ</div>
+              </div>
+              <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+                {lowCount>0&&<div style={{background:"#FEF3C7",color:"#92400e",padding:"6px 14px",borderRadius:20,fontSize:12,fontWeight:500}}>⚠️ ใกล้หมด {lowCount} รายการ</div>}
+                {outCount>0&&<div style={{background:"#FEE2E2",color:"#991b1b",padding:"6px 14px",borderRadius:20,fontSize:12,fontWeight:500}}>🔴 หมดแล้ว {outCount} รายการ</div>}
+              </div>
+            </div>
+
+            {/* ตัดสต๊อกจากยอดขาย */}
+            <div style={{background:"#fff",borderRadius:14,padding:"18px 20px",border:"1.5px solid #9FE1CB",marginBottom:20}}>
+              <div style={{fontWeight:500,fontSize:14,color:"#0F6E56",marginBottom:12}}>✂️ ตัดสต๊อกจากยอดขาย</div>
+              <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12,flexWrap:"wrap"}}>
+                <div>
+                  <label style={{fontSize:12,color:"#64748b",display:"block",marginBottom:4}}>เลือกวันที่</label>
+                  <input type="date" style={{...inp,width:160}} value={stockDate} onChange={e=>setStockDate(e.target.value)}/>
+                </div>
+                <div style={{flex:1,minWidth:200}}>
+                  <div style={{fontSize:12,color:"#64748b",marginBottom:4}}>ยอดขายวันนี้:</div>
+                  <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                    {menus.map(m=>{const q=salesData[stockDate]?.[m.id]||0;return q>0&&<span key={m.id} style={{fontSize:11,background:"#E1F5EE",color:"#0F6E56",padding:"2px 8px",borderRadius:8}}>{m.name} ×{q}</span>;})}
+                    {!Object.values(salesData[stockDate]||{}).some(v=>v>0)&&<span style={{fontSize:12,color:"#94a3b8"}}>ยังไม่มียอดขายวันนี้</span>}
+                  </div>
+                </div>
+                {alreadyDeducted
+                  ?<div style={{padding:"8px 16px",borderRadius:9,background:"#E1F5EE",color:"#0F6E56",fontSize:12,fontWeight:500}}>✅ ตัดสต๊อกแล้ว</div>
+                  :<button style={{padding:"8px 18px",borderRadius:9,background:"#0F6E56",border:"none",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:500}} onClick={()=>deductStockForDate(stockDate)}>✂️ ยืนยันตัดสต๊อก</button>
+                }
+              </div>
+              {Object.keys(todayUsage).length>0&&(
+                <div style={{borderTop:"1px solid #E1F5EE",paddingTop:10}}>
+                  <div style={{fontSize:11,color:"#64748b",marginBottom:6}}>วัตถุดิบที่จะ{alreadyDeducted?"ถูกตัดไปแล้ว":"ถูกตัด"}:</div>
+                  <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                    {Object.entries(todayUsage).map(([id,amt])=>{const r=rms.find(x=>x.id===+id);return r&&<span key={id} style={{fontSize:11,background:"#f1f5f9",padding:"2px 8px",borderRadius:6,color:"#475569"}}>{r.name} -{Number(amt).toFixed(1)}{r.unit}</span>;})}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ตารางสต๊อก */}
+            <div style={{background:"#fff",borderRadius:14,border:"1.5px solid #e2e8f0",overflow:"hidden"}}>
+              <div style={{padding:"14px 20px",borderBottom:"1px solid #f1f5f9",display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                <span style={{fontWeight:500,fontSize:13,color:"#1e293b",marginRight:4}}>วัตถุดิบทั้งหมด ({rms.length} รายการ)</span>
+                <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                  {rmCatsAll.map(c=><button key={c} onClick={()=>setStockCatF(c)} style={{padding:"3px 12px",borderRadius:20,border:"1.5px solid",borderColor:stockCatF===c?"#0F6E56":"#e2e8f0",background:stockCatF===c?"#0F6E56":"#fff",color:stockCatF===c?"#fff":"#64748b",fontSize:11,cursor:"pointer"}}>{c}</button>)}
+                </div>
+              </div>
+              <table style={{width:"100%",borderCollapse:"collapse"}}>
+                <thead>
+                  <tr style={{background:"#f8fafc"}}>
+                    {["วัตถุดิบ","หน่วย","สต๊อกปัจจุบัน","ขั้นต่ำ","สถานะ",""].map(h=><th key={h} style={{padding:"10px 14px",textAlign:"left",fontSize:11,color:"#64748b",fontWeight:500,borderBottom:"1px solid #f1f5f9"}}>{h}</th>)}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredRms.map(r=>{
+                    const cur=stock[r.id]||0;
+                    const min=stockMin[r.id]||0;
+                    const isEdit=editStockId===r.id;
+                    const status=min>0?(cur<=0?"🔴 หมด":cur<min?"🟡 ใกล้หมด":"🟢 ปกติ"):"–";
+                    const statusColor=min>0?(cur<=0?"#991b1b":cur<min?"#92400e":"#065f46"):"#94a3b8";
+                    return(
+                      <tr key={r.id} style={{borderBottom:"1px solid #f8fafc",background:isEdit?"#f0fdf4":"#fff"}}>
+                        <td style={{padding:"10px 14px",fontSize:13,fontWeight:500,color:"#1e293b"}}>{r.name}</td>
+                        <td style={{padding:"10px 14px",fontSize:12,color:"#64748b"}}>{r.unit}</td>
+                        <td style={{padding:"10px 14px"}}>
+                          {isEdit
+                            ?<div style={{display:"flex",gap:6,alignItems:"center"}}>
+                                <input type="number" style={{...inp,width:80}} value={stock[r.id]||0} onChange={e=>setStock({...stock,[r.id]:+e.target.value})}/>
+                                <span style={{fontSize:11,color:"#64748b"}}>+เพิ่ม:</span>
+                                <input type="number" style={{...inp,width:70}} value={addAmt} onChange={e=>setAddAmt(+e.target.value)} placeholder="0"/>
+                                <button style={{...btnSm,background:"#0F6E56",color:"#fff",border:"none"}} onClick={()=>{setStock({...stock,[r.id]:(stock[r.id]||0)+addAmt});setAddAmt(0);setEditStockId(null);}}>✓</button>
+                              </div>
+                            :<span style={{fontWeight:500,color:cur<=0&&min>0?"#ef4444":cur<min&&min>0?"#f59e0b":"#1e293b"}}>{Number(cur).toFixed(1)} {r.unit}</span>
+                          }
+                        </td>
+                        <td style={{padding:"10px 14px"}}>
+                          {isEdit
+                            ?<input type="number" style={{...inp,width:80}} value={stockMin[r.id]||0} onChange={e=>setStockMin({...stockMin,[r.id]:+e.target.value})} placeholder="ขั้นต่ำ"/>
+                            :<span style={{fontSize:12,color:"#64748b"}}>{min||"–"}</span>
+                          }
+                        </td>
+                        <td style={{padding:"10px 14px",fontSize:12,fontWeight:500,color:statusColor}}>{status}</td>
+                        <td style={{padding:"10px 14px"}}>
+                          {isEdit
+                            ?<button style={btnSm} onClick={()=>setEditStockId(null)}>ยกเลิก</button>
+                            :<button style={btnSm} onClick={()=>{setEditStockId(r.id);setAddAmt(0);}}>แก้ไข</button>
+                          }
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      })()}
 
       </div>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" key="cjs"></script>
