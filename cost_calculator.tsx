@@ -121,6 +121,65 @@ const initRaw=[
   {id:1100,name:"ไม้เสียบผลไม้",unit:"ชิ้น",pricePerPack:45,packSize:100,cat:"บรรจุภัณฑ์"},
   {id:1101,name:"ไวท์พีท monin",unit:"ml",pricePerPack:365,packSize:700,cat:"ไซรัป"},
 ];
+// รายการวัตถุดิบ SHIFT — สำหรับสาขา 3
+const shiftRaw=[
+  {id:2001,name:"เมล็ดกาแฟคั่วกลาง SHIFT",unit:"g",pricePerPack:650,packSize:1000,cat:"ชา/กาแฟ"},
+  {id:2002,name:"เมล็ดกาแฟคั่วเข้ม SHIFT",unit:"g",pricePerPack:650,packSize:1000,cat:"ชา/กาแฟ"},
+  {id:2003,name:"นม Mac Milk บาริสต้า 1L",unit:"ml",pricePerPack:55,packSize:1000,cat:"นม"},
+  {id:2004,name:"นมเมจิกจืด 2L",unit:"ml",pricePerPack:64,packSize:2000,cat:"นม"},
+  {id:2005,name:"นมโอ๊ต 1L",unit:"ml",pricePerPack:75,packSize:1000,cat:"นม"},
+  {id:2006,name:"นมข้นจืด คาเนชัน",unit:"g",pricePerPack:49,packSize:385,cat:"นม"},
+  {id:2007,name:"นมข้นหวาน ถุง 2kg",unit:"g",pricePerPack:89,packSize:2000,cat:"นม"},
+  {id:2008,name:"ผงโกโก้ทิวลิป 440g",unit:"g",pricePerPack:450,packSize:1000,cat:"ชา/กาแฟ"},
+  {id:2009,name:"Dutch Cocoa CP-1 2.5kg",unit:"g",pricePerPack:580,packSize:2500,cat:"ชา/กาแฟ"},
+  {id:2010,name:"ผงมัทฉะ MIO 500g",unit:"g",pricePerPack:3200,packSize:1000,cat:"ชา/กาแฟ"},
+  {id:2011,name:"ผงมัทฉะ HOJICHA 500g",unit:"g",pricePerPack:2140,packSize:500,cat:"ชา/กาแฟ"},
+  {id:2012,name:"ผงมัทฉะ GO HOUSE 500g",unit:"g",pricePerPack:3155,packSize:500,cat:"ชา/กาแฟ"},
+  {id:2013,name:"Monin Smoked Oak Syrup",unit:"ml",pricePerPack:321,packSize:700,cat:"ไซรัป"},
+  {id:2014,name:"Monin Tiramisu Syrup",unit:"ml",pricePerPack:321,packSize:700,cat:"ไซรัป"},
+  {id:2015,name:"Monin Peach Syrup",unit:"ml",pricePerPack:321,packSize:700,cat:"ไซรัป"},
+  {id:2016,name:"Monin Blue Curacao Syrup",unit:"ml",pricePerPack:321,packSize:700,cat:"ไซรัป"},
+  {id:2017,name:"Monin Caramel Syrup",unit:"ml",pricePerPack:321,packSize:700,cat:"ไซรัป"},
+  {id:2018,name:"Monin Raspberry Syrup",unit:"ml",pricePerPack:321,packSize:700,cat:"ไซรัป"},
+  {id:2019,name:"Monin Cookie Choc Syrup",unit:"ml",pricePerPack:365,packSize:700,cat:"ไซรัป"},
+  {id:2020,name:"Senorita Yuzu Syrup",unit:"ml",pricePerPack:210,packSize:700,cat:"ไซรัป"},
+  {id:2021,name:"Senorita Lychee Syrup",unit:"ml",pricePerPack:190,packSize:700,cat:"ไซรัป"},
+  {id:2022,name:"Senorita Coconut Syrup",unit:"ml",pricePerPack:210,packSize:700,cat:"ไซรัป"},
+  {id:2023,name:"Senorita Mint Fresh Syrup",unit:"ml",pricePerPack:210,packSize:700,cat:"ไซรัป"},
+  {id:2024,name:"1883 Mixed Berry Syrup",unit:"ml",pricePerPack:650,packSize:700,cat:"ไซรัป"},
+  {id:2025,name:"1883 Raspberry Syrup",unit:"ml",pricePerPack:650,packSize:700,cat:"ไซรัป"},
+  {id:2026,name:"Molle Caramel Syrup",unit:"ml",pricePerPack:159,packSize:750,cat:"ไซรัป"},
+  {id:2027,name:"Passion Fruit Syrup",unit:"ml",pricePerPack:85,packSize:700,cat:"ไซรัป"},
+  {id:2028,name:"น้ำตาลโตนด ไซรัป",unit:"ml",pricePerPack:120,packSize:700,cat:"ไซรัป"},
+  {id:2029,name:"Monin Yuzu Puree 1L",unit:"ml",pricePerPack:430,packSize:1000,cat:"ซอส"},
+  {id:2030,name:"Monin Mix Berry Puree 1L",unit:"ml",pricePerPack:585,packSize:1000,cat:"ซอส"},
+  {id:2031,name:"Fruit Mix Raspberry Puree",unit:"ml",pricePerPack:585,packSize:1000,cat:"ซอส"},
+  {id:2032,name:"ซอสคาราเมล",unit:"g",pricePerPack:130,packSize:1200,cat:"ซอส"},
+  {id:2033,name:"ซอสช็อกโกแลต",unit:"g",pricePerPack:130,packSize:1200,cat:"ซอส"},
+  {id:2034,name:"สตรอว์เบอร์รี่สด กล่อง",unit:"g",pricePerPack:189,packSize:500,cat:"ผลไม้"},
+  {id:2035,name:"แยมสตรอว์เบอร์รี่ 1.8kg",unit:"g",pricePerPack:275,packSize:1800,cat:"ผลไม้"},
+  {id:2036,name:"Ligo Peach กระป๋อง",unit:"g",pricePerPack:55,packSize:425,cat:"ผลไม้"},
+  {id:2037,name:"มิกซ์เบอร์รี่แช่แข็ง เอโร่ 1kg",unit:"g",pricePerPack:220,packSize:1000,cat:"ผลไม้"},
+  {id:2038,name:"เนื้อมะพร้าวแช่แข็ง ออลโคโค",unit:"g",pricePerPack:180,packSize:1000,cat:"ผลไม้"},
+  {id:2039,name:"บ๊วยดอยคำ",unit:"ml",pricePerPack:85,packSize:500,cat:"ผลไม้"},
+  {id:2040,name:"บ๊วยดอง",unit:"g",pricePerPack:60,packSize:320,cat:"ผลไม้"},
+  {id:2041,name:"เชอร์รี่ดอง Maraschino",unit:"g",pricePerPack:62,packSize:350,cat:"ผลไม้"},
+  {id:2042,name:"ลิ้นจี่กระป๋อง เอโร่ 3 กระป๋อง",unit:"g",pricePerPack:225,packSize:1695,cat:"ผลไม้"},
+  {id:2043,name:"ส้มอบแห้ง ตกแต่ง",unit:"ชิ้น",pricePerPack:2,packSize:1,cat:"ท็อปปิ้ง"},
+  {id:2044,name:"ถั่วตุ๊บตับ",unit:"g",pricePerPack:40,packSize:120,cat:"ท็อปปิ้ง"},
+  {id:2045,name:"Biscoff Lotus",unit:"แผ่น",pricePerPack:5,packSize:1,cat:"เบเกอรี่"},
+  {id:2046,name:"ชาไทย Simple",unit:"g",pricePerPack:300,packSize:3000,cat:"ชา/กาแฟ"},
+  {id:2047,name:"น้ำแข็ง ถุง/วัน",unit:"วัน",pricePerPack:150,packSize:1,cat:"ของเหลว"},
+  {id:2048,name:"ชเวปมะนาว กระป๋อง 325ml",unit:"ml",pricePerPack:13,packSize:325,cat:"ของเหลว"},
+  {id:2049,name:"ชาลิปตัน กระป๋อง",unit:"ml",pricePerPack:12,packSize:245,cat:"ชา/กาแฟ"},
+  {id:2050,name:"โซดา LEO ขวด 325ml",unit:"ml",pricePerPack:7,packSize:325,cat:"ของเหลว"},
+  {id:2051,name:"น้ำส้ม ซันควิก Orange 500ml",unit:"ml",pricePerPack:250,packSize:500,cat:"ของเหลว"},
+  {id:2052,name:"น้ำส้ม ซันควิก Mandarin 500ml",unit:"ml",pricePerPack:250,packSize:500,cat:"ของเหลว"},
+  {id:2053,name:"น้ำผึ้ง แพ็คคู่",unit:"ml",pricePerPack:210,packSize:1000,cat:"ของเหลว"},
+  {id:2054,name:"น้ำตาลทราย 1kg",unit:"g",pricePerPack:28,packSize:1000,cat:"แห้ง"},
+  {id:2055,name:"ผงมะนาว 1kg",unit:"g",pricePerPack:189,packSize:1000,cat:"แห้ง"},
+  {id:2056,name:"น้ำดื่ม/น้ำกรอง ถัง 20L",unit:"ml",pricePerPack:42,packSize:20000,cat:"ของเหลว"},
+];
 const initComps=[
   {id:101,name:"น้ำเชื่อม (โฮมเมด)",unit:"ml",yield:1500,cat:"โฮมเมด",ings:[{rmId:1,amt:1000},{rmId:2,amt:1000}]},
   {id:102,name:"แยมสตรอว์เบอร์รี่ (โฮมเมด)",unit:"g",yield:1200,cat:"โฮมเมด",ings:[{rmId:3,amt:1000},{rmId:1,amt:500}]},
@@ -222,11 +281,16 @@ export default function App(){
       if(saved){
         const parsed=JSON.parse(saved);
         if(parsed&&parsed.length>0){
-          // migrate: add new PDF items to branch 1 only
+          // migrate: add PDF items per branch
           const migrated=parsed.map((b:any,idx:number)=>{
-            if(idx!==0)return b;
-            const existingIds=new Set((b.rms||[]).map((r:any)=>r.id));
-            const toAdd=initRaw.filter(r=>r.id>=1001&&!existingIds.has(r.id));
+            let toAdd:any[]=[];
+            if(idx===0){
+              const existingIds=new Set((b.rms||[]).map((r:any)=>r.id));
+              toAdd=initRaw.filter(r=>r.id>=1001&&!existingIds.has(r.id));
+            } else if(idx===2){
+              const existingIds=new Set((b.rms||[]).map((r:any)=>r.id));
+              toAdd=shiftRaw.filter(r=>!existingIds.has(r.id));
+            }
             if(toAdd.length===0)return b;
             const merged=[...(b.rms||[]),...toAdd].sort((a:any,b:any)=>a.name.localeCompare(b.name,"th"));
             return{...b,rms:merged};
