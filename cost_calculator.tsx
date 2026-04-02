@@ -161,8 +161,14 @@ export default function App(){
   const [editIngIdx,setEditIngIdx]=useState(null);
   const [editIngVal,setEditIngVal]=useState({type:"raw",id:"",amt:0});
   const [nf,setNf]=useState({name:"",amt:0,period:"เดือน",icon:"📦"});
+  const [pdfLoading,setPdfLoading]=useState(false);
+  const [pdfMsg,setPdfMsg]=useState("");
+  const [gsUrl,setGsUrl]=useState(()=>{try{return localStorage.getItem("cafe_gs_url")||"";}catch(e){return "";}});
+  const [gsSyncMsg,setGsSyncMsg]=useState("");
+  const [showGsSettings,setShowGsSettings]=useState(false);
   const chartRef=useRef(null);
   const chartInst=useRef(null);
+  const syncTimerRef=useRef(null);
 
   useEffect(()=>{
     try{localStorage.setItem("cafe_branches",JSON.stringify(branches));}catch(e){}
@@ -195,12 +201,6 @@ export default function App(){
       }catch(err){setGsSyncMsg("❌ เชื่อมต่อไม่ได้");}
     },3000);
   },[branches,gsUrl]);
-  const [pdfLoading,setPdfLoading]=useState(false);
-  const [pdfMsg,setPdfMsg]=useState("");
-  const [gsUrl,setGsUrl]=useState(()=>{try{return localStorage.getItem("cafe_gs_url")||"";}catch(e){return "";}});
-  const [gsSyncMsg,setGsSyncMsg]=useState("");
-  const [showGsSettings,setShowGsSettings]=useState(false);
-  const syncTimerRef=useRef(null);
 
   const fixedPD=fixed.reduce((s,f)=>s+(f.period==="วัน"?f.amt:f.period==="เดือน"?f.amt/30:f.amt/365),0);
 
