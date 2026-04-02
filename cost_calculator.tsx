@@ -167,8 +167,40 @@ export default function App(){
   useEffect(()=>{
     try{localStorage.setItem("cafe_branches",JSON.stringify(branches));}catch(e){}
   },[branches]);
+
+  useEffect(()=>{
+    if(!gsUrl)return;
+    if(syncTimerRef.current)clearTimeout(syncTimerRef.current);
+    syncTimerRef.current=setTimeout(async()=>{
+      try{
+        setGsSyncMsg("⏳ กำลัง sync...");
+        const payload={branches:branches.map(b=>({
+          name:b.name,
+          rms:b.rms,
+          fixed:b.fixed,
+          menus:b.menus.map(m=>{
+            const cost=m.ings.reduce((s,i)=>{
+              if(i.type==="raw"){const r=b.rms.find(x=>x.id===i.id);return s+(r?(r.pricePerPack/r.packSize)*i.amt:0);}
+              const c=b.comps.find(x=>x.id===i.id);
+              if(!c)return s;
+              const cc=c.ings.reduce((ss,ci)=>{const r=b.rms.find(x=>x.id===ci.rmId);return ss+(r?(r.pricePerPack/r.packSize)*ci.amt:0);},0);
+              return s+(c.yield>0?(cc/c.yield)*i.amt:0);
+            },0);
+            return{...m,cost:cost.toFixed(2),gm:m.price>0?((m.price-cost)/m.price*100).toFixed(1):0};
+          }),
+        }))};
+        const res=await fetch(gsUrl,{method:"POST",body:JSON.stringify(payload),headers:{"Content-Type":"text/plain"}});
+        const json=await res.json();
+        setGsSyncMsg(json.success?`✅ Sync แล้ว ${new Date().toLocaleTimeString("th-TH")}`:"❌ Sync ล้มเหลว");
+      }catch(err){setGsSyncMsg("❌ เชื่อมต่อไม่ได้");}
+    },3000);
+  },[branches,gsUrl]);
   const [pdfLoading,setPdfLoading]=useState(false);
   const [pdfMsg,setPdfMsg]=useState("");
+  const [gsUrl,setGsUrl]=useState(()=>{try{return localStorage.getItem("cafe_gs_url")||"";}catch(e){return "";}});
+  const [gsSyncMsg,setGsSyncMsg]=useState("");
+  const [showGsSettings,setShowGsSettings]=useState(false);
+  const syncTimerRef=useRef(null);
 
   const fixedPD=fixed.reduce((s,f)=>s+(f.period==="วัน"?f.amt:f.period==="เดือน"?f.amt/30:f.amt/365),0);
 
@@ -277,7 +309,23 @@ export default function App(){
                 <div style={{fontSize:12,color:"rgba(255,255,255,.7)"}}>วัตถุดิบ → ของผสม → เมนู → ต้นทุน</div>
               </div>
             </div>
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              {gsSyncMsg&&<span style={{fontSize:11,color:"rgba(255,255,255,.85)",background:"rgba(0,0,0,.2)",padding:"3px 10px",borderRadius:20}}>{gsSyncMsg}</span>}
+              <button onClick={()=>setShowGsSettings(!showGsSettings)} style={{padding:"6px 14px",borderRadius:20,border:"2px solid rgba(255,255,255,.4)",background:"rgba(255,255,255,.15)",color:"#fff",cursor:"pointer",fontSize:12}}>
+                ⚙️ Google Sheets
+              </button>
+            </div>
           </div>
+          {showGsSettings&&(
+            <div style={{background:"rgba(0,0,0,.25)",borderRadius:12,padding:"14px 16px",marginBottom:12,display:"flex",gap:10,alignItems:"flex-end",flexWrap:"wrap"}}>
+              <div style={{flex:1,minWidth:260}}>
+                <div style={{fontSize:11,color:"rgba(255,255,255,.7)",marginBottom:4}}>Google Apps Script URL (Web App)</div>
+                <input style={{...inp,background:"rgba(255,255,255,.9)",fontSize:12}} placeholder="https://script.google.com/macros/s/..." value={gsUrl} onChange={e=>{setGsUrl(e.target.value);try{localStorage.setItem("cafe_gs_url",e.target.value);}catch(ex){}}}/>
+              </div>
+              <button style={{padding:"8px 16px",borderRadius:9,background:"#fff",border:"none",color:"#534AB7",cursor:"pointer",fontSize:12,fontWeight:500}} onClick={()=>setShowGsSettings(false)}>บันทึก ✓</button>
+              <a href="https://script.google.com" target="_blank" rel="noreferrer" style={{padding:"8px 16px",borderRadius:9,background:"rgba(255,255,255,.15)",border:"1.5px solid rgba(255,255,255,.3)",color:"#fff",cursor:"pointer",fontSize:12,textDecoration:"none"}}>เปิด Apps Script ↗</a>
+            </div>
+          )}
           <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:12,flexWrap:"wrap"}}>
             <span style={{fontSize:11,color:"rgba(255,255,255,.6)",marginRight:4}}>เลือกสาขา:</span>
             {branches.map(b=>(
