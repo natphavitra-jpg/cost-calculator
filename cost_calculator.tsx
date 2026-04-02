@@ -315,7 +315,7 @@ export default function App(){
   useEffect(()=>{
     if(!gsUrl)return;
     if(syncTimerRef.current)clearTimeout(syncTimerRef.current);
-    syncTimerRef.current=setTimeout(doSync,3000);
+    syncTimerRef.current=setTimeout(doSync,10000);
   },[branches,gsUrl]);
 
   const fixedPD=fixed.reduce((s,f)=>s+(f.period==="วัน"?f.amt:f.period==="เดือน"?f.amt/30:f.amt/365),0);
