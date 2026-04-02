@@ -180,6 +180,66 @@ const shiftRaw=[
   {id:2055,name:"ผงมะนาว 1kg",unit:"g",pricePerPack:189,packSize:1000,cat:"แห้ง"},
   {id:2056,name:"น้ำดื่ม/น้ำกรอง ถัง 20L",unit:"ml",pricePerPack:42,packSize:20000,cat:"ของเหลว"},
 ];
+// สูตรเมนู SHIFT — สำหรับสาขา 3
+// pump น้ำตาล 1 ปึ้ม = 10g, pump นมมิกซ์ 1 ปึ้ม = 20g, 1 shot กาแฟ = 18g, 1 oz = 30ml
+const shiftMenus=[
+  // --- HOT COFFEE ---
+  {id:3001,name:"อเมริกาโน่ร้อน",cat:"Hot Coffee",price:70,ings:[{type:"raw",id:2001,amt:36},{type:"raw",id:2054,amt:20},{type:"raw",id:2056,amt:110}]},
+  {id:3002,name:"เอสเพรซโซ่ร้อน",cat:"Hot Coffee",price:65,ings:[{type:"raw",id:2001,amt:18},{type:"raw",id:2007,amt:60},{type:"raw",id:2006,amt:60},{type:"raw",id:2003,amt:60}]},
+  {id:3003,name:"คาปูชิโน่ร้อน",cat:"Hot Coffee",price:85,ings:[{type:"raw",id:2001,amt:36},{type:"raw",id:2007,amt:60},{type:"raw",id:2003,amt:100}]},
+  {id:3004,name:"มอคค่าร้อน",cat:"Hot Coffee",price:90,ings:[{type:"raw",id:2001,amt:36},{type:"raw",id:2007,amt:60},{type:"raw",id:2003,amt:100},{type:"raw",id:2008,amt:8}]},
+  {id:3005,name:"ลาเต้ร้อน",cat:"Hot Coffee",price:85,ings:[{type:"raw",id:2001,amt:36},{type:"raw",id:2007,amt:60},{type:"raw",id:2003,amt:150}]},
+  {id:3006,name:"คาราเมลมัคคิอาโต้ร้อน",cat:"Hot Coffee",price:90,ings:[{type:"raw",id:2001,amt:36},{type:"raw",id:2017,amt:20},{type:"raw",id:2007,amt:40},{type:"raw",id:2003,amt:150}]},
+  // --- HOT NON-COFFEE ---
+  {id:3007,name:"ฮอทช็อกโกแลต",cat:"Hot Non-Coffee",price:70,ings:[{type:"raw",id:2003,amt:120},{type:"raw",id:2008,amt:8},{type:"raw",id:2007,amt:80},{type:"raw",id:2006,amt:80}]},
+  {id:3008,name:"ฮอทที",cat:"Hot Non-Coffee",price:35,ings:[{type:"raw",id:2049,amt:30},{type:"raw",id:2056,amt:170}]},
+  {id:3009,name:"ฮอทมัทฉะลาเต้ MIO",cat:"Hot Non-Coffee",price:85,ings:[{type:"raw",id:2010,amt:5},{type:"raw",id:2003,amt:150},{type:"raw",id:2007,amt:80},{type:"raw",id:2056,amt:30}]},
+  {id:3010,name:"ฮอทมัทฉะลาเต้ Hojicha",cat:"Hot Non-Coffee",price:85,ings:[{type:"raw",id:2011,amt:5},{type:"raw",id:2003,amt:150},{type:"raw",id:2007,amt:80},{type:"raw",id:2056,amt:30}]},
+  {id:3011,name:"ฮอทมัทฉะลาเต้ Go House",cat:"Hot Non-Coffee",price:85,ings:[{type:"raw",id:2012,amt:5},{type:"raw",id:2003,amt:150},{type:"raw",id:2007,amt:80},{type:"raw",id:2056,amt:30}]},
+  {id:3012,name:"เพียวมัทฉะร้อน MIO",cat:"Hot Non-Coffee",price:60,ings:[{type:"raw",id:2010,amt:2.5},{type:"raw",id:2056,amt:150}]},
+  {id:3013,name:"เพียวมัทฉะร้อน Hojicha",cat:"Hot Non-Coffee",price:60,ings:[{type:"raw",id:2011,amt:2.5},{type:"raw",id:2056,amt:150}]},
+  {id:3014,name:"เพียวมัทฉะร้อน Go House",cat:"Hot Non-Coffee",price:60,ings:[{type:"raw",id:2012,amt:2.5},{type:"raw",id:2056,amt:150}]},
+  {id:3015,name:"ฮอทมิลค์",cat:"Hot Non-Coffee",price:50,ings:[{type:"raw",id:2003,amt:150},{type:"raw",id:2007,amt:60}]},
+  // --- ICED COFFEE ---
+  {id:3016,name:"อเมริกาโน่เย็น",cat:"Iced Coffee",price:70,ings:[{type:"raw",id:2001,amt:36},{type:"raw",id:2054,amt:20},{type:"raw",id:2056,amt:110}]},
+  {id:3017,name:"คาปูชิโน่เย็น",cat:"Iced Coffee",price:85,ings:[{type:"raw",id:2001,amt:36},{type:"raw",id:2007,amt:60},{type:"raw",id:2003,amt:100}]},
+  {id:3018,name:"ลาเต้เย็น",cat:"Iced Coffee",price:70,ings:[{type:"raw",id:2001,amt:36},{type:"raw",id:2007,amt:60},{type:"raw",id:2003,amt:150}]},
+  {id:3019,name:"มอคค่าเย็น",cat:"Iced Coffee",price:80,ings:[{type:"raw",id:2001,amt:36},{type:"raw",id:2007,amt:60},{type:"raw",id:2003,amt:100},{type:"raw",id:2008,amt:8}]},
+  {id:3020,name:"คาราเมลมัคคิอาโต้เย็น",cat:"Iced Coffee",price:90,ings:[{type:"raw",id:2001,amt:36},{type:"raw",id:2017,amt:20},{type:"raw",id:2007,amt:40},{type:"raw",id:2003,amt:150}]},
+  {id:3021,name:"อเมริกาโน่น้ำส้ม",cat:"Iced Coffee",price:65,ings:[{type:"raw",id:2001,amt:36},{type:"raw",id:2051,amt:50},{type:"raw",id:2050,amt:45},{type:"raw",id:2056,amt:45}]},
+  {id:3022,name:"ยูซุคอฟฟี่",cat:"Iced Coffee",price:80,ings:[{type:"raw",id:2001,amt:36},{type:"raw",id:2020,amt:30},{type:"raw",id:2050,amt:100}]},
+  {id:3023,name:"โคโค่นัทคอฟฟี่",cat:"Iced Coffee",price:80,ings:[{type:"raw",id:2001,amt:36},{type:"raw",id:2022,amt:40},{type:"raw",id:2038,amt:30},{type:"raw",id:2056,amt:100}]},
+  {id:3024,name:"ปาล์มชูการ์ลาเต้",cat:"Iced Coffee",price:65,ings:[{type:"raw",id:2001,amt:36},{type:"raw",id:2028,amt:45},{type:"raw",id:2003,amt:150}]},
+  {id:3025,name:"ทีรามิสุลาเต้",cat:"Iced Coffee",price:80,ings:[{type:"raw",id:2001,amt:36},{type:"raw",id:2014,amt:30},{type:"raw",id:2008,amt:8},{type:"raw",id:2007,amt:60},{type:"raw",id:2003,amt:100},{type:"raw",id:2006,amt:60}]},
+  {id:3026,name:"สโมคโอ๊คลาเต้",cat:"Iced Coffee",price:105,ings:[{type:"raw",id:2001,amt:36},{type:"raw",id:2013,amt:30},{type:"raw",id:2019,amt:10},{type:"raw",id:2008,amt:8},{type:"raw",id:2007,amt:40},{type:"raw",id:2003,amt:100},{type:"raw",id:2006,amt:60}]},
+  {id:3027,name:"ราสเบอร์รี่มอคค่า",cat:"Iced Coffee",price:80,ings:[{type:"raw",id:2018,amt:20},{type:"raw",id:2031,amt:20},{type:"raw",id:2037,amt:30},{type:"raw",id:2007,amt:40},{type:"raw",id:2003,amt:100},{type:"raw",id:2006,amt:60}]},
+  // --- NON-COFFEE ---
+  {id:3028,name:"นมสดเย็น",cat:"Non-Coffee",price:50,ings:[{type:"raw",id:2003,amt:150},{type:"raw",id:2054,amt:20},{type:"raw",id:2007,amt:40},{type:"raw",id:2006,amt:60}]},
+  {id:3029,name:"นมสดคาราเมล",cat:"Non-Coffee",price:70,ings:[{type:"raw",id:2003,amt:150},{type:"raw",id:2017,amt:20},{type:"raw",id:2007,amt:40},{type:"raw",id:2006,amt:60}]},
+  {id:3030,name:"สตรอว์เบอร์รี่นม",cat:"Non-Coffee",price:75,ings:[{type:"raw",id:2035,amt:60},{type:"raw",id:2003,amt:120},{type:"raw",id:2006,amt:60},{type:"raw",id:2007,amt:40}]},
+  {id:3031,name:"มัทฉะลาเต้ MIO",cat:"Non-Coffee",price:85,ings:[{type:"raw",id:2010,amt:5},{type:"raw",id:2003,amt:150},{type:"raw",id:2007,amt:80},{type:"raw",id:2056,amt:30}]},
+  {id:3032,name:"มัทฉะลาเต้ Hojicha",cat:"Non-Coffee",price:85,ings:[{type:"raw",id:2011,amt:5},{type:"raw",id:2003,amt:150},{type:"raw",id:2007,amt:80},{type:"raw",id:2056,amt:30}]},
+  {id:3033,name:"มัทฉะลาเต้ Go House",cat:"Non-Coffee",price:85,ings:[{type:"raw",id:2012,amt:5},{type:"raw",id:2003,amt:150},{type:"raw",id:2007,amt:80},{type:"raw",id:2056,amt:30}]},
+  {id:3034,name:"เพียวมัทฉะ MIO",cat:"Non-Coffee",price:65,ings:[{type:"raw",id:2010,amt:2.5},{type:"raw",id:2056,amt:150}]},
+  {id:3035,name:"เพียวมัทฉะ Hojicha",cat:"Non-Coffee",price:65,ings:[{type:"raw",id:2011,amt:2.5},{type:"raw",id:2056,amt:150}]},
+  {id:3036,name:"เพียวมัทฉะ Go House",cat:"Non-Coffee",price:65,ings:[{type:"raw",id:2012,amt:2.5},{type:"raw",id:2056,amt:150}]},
+  {id:3037,name:"มัทฉะยูซุ MIO",cat:"Non-Coffee",price:95,ings:[{type:"raw",id:2010,amt:5},{type:"raw",id:2020,amt:30},{type:"raw",id:2050,amt:50},{type:"raw",id:2056,amt:30}]},
+  {id:3038,name:"มัทฉะยูซุ Hojicha",cat:"Non-Coffee",price:95,ings:[{type:"raw",id:2011,amt:5},{type:"raw",id:2020,amt:30},{type:"raw",id:2050,amt:50},{type:"raw",id:2056,amt:30}]},
+  {id:3039,name:"มัทฉะยูซุ Go House",cat:"Non-Coffee",price:95,ings:[{type:"raw",id:2012,amt:5},{type:"raw",id:2020,amt:30},{type:"raw",id:2050,amt:50},{type:"raw",id:2056,amt:30}]},
+  {id:3040,name:"มัทฉะสตรอว์เบอร์รี่ MIO",cat:"Non-Coffee",price:95,ings:[{type:"raw",id:2010,amt:5},{type:"raw",id:2035,amt:30},{type:"raw",id:2003,amt:100},{type:"raw",id:2007,amt:60},{type:"raw",id:2006,amt:60},{type:"raw",id:2056,amt:30}]},
+  {id:3041,name:"มัทฉะสตรอว์เบอร์รี่ Hojicha",cat:"Non-Coffee",price:95,ings:[{type:"raw",id:2011,amt:5},{type:"raw",id:2035,amt:30},{type:"raw",id:2003,amt:100},{type:"raw",id:2007,amt:60},{type:"raw",id:2006,amt:60},{type:"raw",id:2056,amt:30}]},
+  {id:3042,name:"มัทฉะสตรอว์เบอร์รี่ Go House",cat:"Non-Coffee",price:95,ings:[{type:"raw",id:2012,amt:5},{type:"raw",id:2035,amt:30},{type:"raw",id:2003,amt:100},{type:"raw",id:2007,amt:60},{type:"raw",id:2006,amt:60},{type:"raw",id:2056,amt:30}]},
+  {id:3043,name:"โกโก้เย็น",cat:"Non-Coffee",price:75,ings:[{type:"raw",id:2003,amt:120},{type:"raw",id:2008,amt:8},{type:"raw",id:2007,amt:80},{type:"raw",id:2006,amt:80}]},
+  {id:3044,name:"มินต์โกโก้",cat:"Non-Coffee",price:80,ings:[{type:"raw",id:2023,amt:20},{type:"raw",id:2003,amt:100},{type:"raw",id:2006,amt:60},{type:"raw",id:2008,amt:16},{type:"raw",id:2056,amt:30}]},
+  {id:3045,name:"ชาไทย SHIFT",cat:"Non-Coffee",price:65,ings:[{type:"raw",id:2046,amt:5},{type:"raw",id:2007,amt:80},{type:"raw",id:2006,amt:60}]},
+  // --- SODA & FRUIT ---
+  {id:3046,name:"ยูซุบ๊วยโซดา",cat:"Soda & Fruit",price:60,ings:[{type:"raw",id:2020,amt:40},{type:"raw",id:2039,amt:30},{type:"raw",id:2040,amt:10},{type:"raw",id:2050,amt:130}]},
+  {id:3047,name:"ยูซุเลม่อนโซดา",cat:"Soda & Fruit",price:60,ings:[{type:"raw",id:2020,amt:40},{type:"raw",id:2050,amt:100}]},
+  {id:3048,name:"โอเชียนบลู",cat:"Soda & Fruit",price:75,ings:[{type:"raw",id:2021,amt:40},{type:"raw",id:2023,amt:10},{type:"raw",id:2050,amt:280},{type:"raw",id:2042,amt:20}]},
+  {id:3049,name:"ลิ้นจี่โซดา",cat:"Soda & Fruit",price:65,ings:[{type:"raw",id:2021,amt:60},{type:"raw",id:2050,amt:150},{type:"raw",id:2042,amt:40}]},
+  {id:3050,name:"มิกซ์เบอร์รี่โซดา",cat:"Soda & Fruit",price:70,ings:[{type:"raw",id:2024,amt:20},{type:"raw",id:2031,amt:30},{type:"raw",id:2050,amt:150}]},
+  {id:3051,name:"ชาพีช",cat:"Soda & Fruit",price:80,ings:[{type:"raw",id:2015,amt:30},{type:"raw",id:2027,amt:20},{type:"raw",id:2049,amt:60},{type:"raw",id:2056,amt:100}]},
+];
 const initComps=[
   {id:101,name:"น้ำเชื่อม (โฮมเมด)",unit:"ml",yield:1500,cat:"โฮมเมด",ings:[{rmId:1,amt:1000},{rmId:2,amt:1000}]},
   {id:102,name:"แยมสตรอว์เบอร์รี่ (โฮมเมด)",unit:"g",yield:1200,cat:"โฮมเมด",ings:[{rmId:3,amt:1000},{rmId:1,amt:500}]},
@@ -283,17 +343,27 @@ export default function App(){
         if(parsed&&parsed.length>0){
           // migrate: add PDF items per branch
           const migrated=parsed.map((b:any,idx:number)=>{
-            let toAdd:any[]=[];
+            let rmsToAdd:any[]=[];
+            let menusToAdd:any[]=[];
             if(idx===0){
               const existingIds=new Set((b.rms||[]).map((r:any)=>r.id));
-              toAdd=initRaw.filter(r=>r.id>=1001&&!existingIds.has(r.id));
+              rmsToAdd=initRaw.filter(r=>r.id>=1001&&!existingIds.has(r.id));
             } else if(idx===2){
-              const existingIds=new Set((b.rms||[]).map((r:any)=>r.id));
-              toAdd=shiftRaw.filter(r=>!existingIds.has(r.id));
+              const existingRmIds=new Set((b.rms||[]).map((r:any)=>r.id));
+              rmsToAdd=shiftRaw.filter(r=>!existingRmIds.has(r.id));
+              const existingMenuIds=new Set((b.menus||[]).map((m:any)=>m.id));
+              menusToAdd=shiftMenus.filter(m=>!existingMenuIds.has(m.id));
             }
-            if(toAdd.length===0)return b;
-            const merged=[...(b.rms||[]),...toAdd].sort((a:any,b:any)=>a.name.localeCompare(b.name,"th"));
-            return{...b,rms:merged};
+            let next={...b};
+            if(rmsToAdd.length>0){
+              const merged=[...(b.rms||[]),...rmsToAdd].sort((a:any,b:any)=>a.name.localeCompare(b.name,"th"));
+              next={...next,rms:merged};
+            }
+            if(menusToAdd.length>0){
+              const merged=[...(b.menus||[]),...menusToAdd].sort((a:any,b:any)=>a.name.localeCompare(b.name,"th"));
+              next={...next,menus:merged};
+            }
+            return next;
           });
           return migrated;
         }
