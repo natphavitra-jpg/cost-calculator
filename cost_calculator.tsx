@@ -319,6 +319,10 @@ export default function App(){
   const [editIngIdx,setEditIngIdx]=useState(null);
   const [editIngVal,setEditIngVal]=useState({type:"raw",id:"",amt:0});
   const [nf,setNf]=useState({name:"",amt:0,period:"เดือน",icon:"📦"});
+  const [stockDate,setStockDate]=useState(todayKey);
+  const [stockCatF,setStockCatF]=useState("ทั้งหมด");
+  const [editStockId,setEditStockId]=useState(null);
+  const [addAmt,setAddAmt]=useState(0);
   const [pdfLoading,setPdfLoading]=useState(false);
   const [pdfMsg,setPdfMsg]=useState("");
   const [gsUrl,setGsUrl]=useState(()=>{try{return localStorage.getItem("cafe_gs_url")||"";}catch(e){return "";}});
@@ -1181,11 +1185,6 @@ export default function App(){
       )}
 
       {tab===6&&(()=>{
-        const [stockDate,setStockDate]=useState(todayKey);
-        const [stockCatF,setStockCatF]=useState("ทั้งหมด");
-        const [editStockId,setEditStockId]=useState(null);
-        const [addAmt,setAddAmt]=useState(0);
-        const usage=calcDailyUsage(stockDate);
         const rmCatsAll=["ทั้งหมด",...Array.from(new Set(rms.map(r=>r.cat)))];
         const filteredRms=rms.filter(r=>stockCatF==="ทั้งหมด"||r.cat===stockCatF);
         const lowCount=rms.filter(r=>stockMin[r.id]&&(stock[r.id]||0)<stockMin[r.id]).length;
