@@ -427,7 +427,7 @@ export default function App(){
               </div>
               {nr.packSize>0&&nr.pricePerPack>0&&<div style={{fontSize:12,color:"#D85A30",marginBottom:10,fontWeight:500}}>ราคาต่อ{nr.unit||"หน่วย"}: ฿{(nr.pricePerPack/nr.packSize).toFixed(4)}</div>}
               <div style={{display:"flex",gap:8}}>
-                <button style={btnP} onClick={()=>{if(!nr.name)return;setRms([...rms,{...nr,id:Date.now()}]);setNr({name:"",unit:"",pricePerPack:0,packSize:1,cat:""});setShowAddRm(false);}}>บันทึก</button>
+                <button style={btnP} onClick={()=>{if(!nr.name)return;setRms([...rms,{...nr,id:Date.now()}].sort((a,b)=>a.name.localeCompare(b.name,"th")));setNr({name:"",unit:"",pricePerPack:0,packSize:1,cat:""});setShowAddRm(false);}}>บันทึก</button>
                 <button style={btnSm} onClick={()=>setShowAddRm(false)}>ยกเลิก</button>
               </div>
             </div>
@@ -459,7 +459,7 @@ export default function App(){
                       </div>
                     </div>
                     {nr.packSize>0&&nr.pricePerPack>0&&<div style={{fontSize:12,color:sc.accent,marginBottom:10,fontWeight:500}}>ราคาต่อ{nr.unit||"หน่วย"}: ฿{(nr.pricePerPack/nr.packSize).toFixed(4)}</div>}
-                    <button style={{...btnP,background:sc.accent}} onClick={()=>{if(!nr.name)return;setRms([...rms,{...nr,id:Date.now(),cat}]);setNr({name:"",unit:"",pricePerPack:0,packSize:1,cat:""});setShowAddRm(false);}}>บันทึก</button>
+                    <button style={{...btnP,background:sc.accent}} onClick={()=>{if(!nr.name)return;setRms([...rms,{...nr,id:Date.now(),cat}].sort((a,b)=>a.name.localeCompare(b.name,"th")));setNr({name:"",unit:"",pricePerPack:0,packSize:1,cat:""});setShowAddRm(false);}}>บันทึก</button>
                   </div>
                 )}
                 <table style={{width:"100%",borderCollapse:"collapse"}}>
@@ -535,7 +535,7 @@ export default function App(){
                 <button style={btnP} onClick={()=>{
                   if(!nc.name||nc.yield<=0)return;
                   if(editCompId){setComps(comps.map(c=>c.id===editCompId?{...nc,id:editCompId}:c));setEditCompId(null);}
-                  else{setComps([...comps,{...nc,id:Date.now()}]);}
+                  else{setComps([...comps,{...nc,id:Date.now()}].sort((a,b)=>a.name.localeCompare(b.name,"th")));}
                   setNc({name:"",unit:"",yield:0,cat:"โฮมเมด",ings:[]});setNcIng({rmId:"",amt:0});setShowAddComp(false);
                 }}>{editCompId?"อัปเดต":"บันทึก"}</button>
                 <button style={btnSm} onClick={()=>{setShowAddComp(false);setEditCompId(null);setNc({name:"",unit:"",yield:0,cat:"โฮมเมด",ings:[]});}}>ยกเลิก</button>
@@ -671,7 +671,7 @@ export default function App(){
                 <button style={btnP} onClick={()=>{
                   if(!nm.name||nm.price<=0)return;
                   if(editMenuId){setMenus(menus.map(m=>m.id===editMenuId?{...nm,id:editMenuId}:m));setEditMenuId(null);}
-                  else{setMenus([...menus,{...nm,id:Date.now()}]);}
+                  else{setMenus([...menus,{...nm,id:Date.now()}].sort((a,b)=>a.name.localeCompare(b.name,"th")));}
                   setNm({name:"",cat:"เครื่องดื่ม",price:0,ings:[]});setNmIng({type:"raw",id:"",amt:0});setShowAddMenu(false);
                 }}>{editMenuId?"อัปเดตเมนู":"บันทึกเมนู"}</button>
                 <button style={btnSm} onClick={()=>{setShowAddMenu(false);setEditMenuId(null);setNm({name:"",cat:"เครื่องดื่ม",price:0,ings:[]});}}>ยกเลิก</button>
@@ -961,7 +961,7 @@ export default function App(){
                 </div>
               </div>
               <div style={{display:"flex",gap:8}}>
-                <button style={btnP} onClick={()=>{if(!nf.name)return;setFixed([...fixed,{...nf,id:Date.now()}]);setNf({name:"",amt:0,period:"เดือน",icon:"📦"});setShowAddFixed(false);}}>บันทึก</button>
+                <button style={btnP} onClick={()=>{if(!nf.name)return;setFixed([...fixed,{...nf,id:Date.now()}].sort((a,b)=>a.name.localeCompare(b.name,"th")));setNf({name:"",amt:0,period:"เดือน",icon:"📦"});setShowAddFixed(false);}}>บันทึก</button>
                 <button style={btnSm} onClick={()=>setShowAddFixed(false)}>ยกเลิก</button>
               </div>
             </div>
