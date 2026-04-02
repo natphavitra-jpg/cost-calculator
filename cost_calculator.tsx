@@ -114,7 +114,13 @@ function MBar({v,max=1,color,h=6}){
 
 export default function App(){
   const [tab,setTab]=useState(0);
-  const [branches,setBranches]=useState(()=>initBranches.map(b=>({...b,sales:genSampleSales()})));
+  const [branches,setBranches]=useState(()=>{
+    try{
+      const saved=localStorage.getItem("cafe_branches");
+      if(saved){const parsed=JSON.parse(saved);if(parsed&&parsed.length>0)return parsed;}
+    }catch(e){}
+    return initBranches.map(b=>({...b,sales:genSampleSales()}));
+  });
   const [activeBranchId,setActiveBranchId]=useState(1);
   const [editBranchId,setEditBranchId]=useState(null);
   const [editBranchName,setEditBranchName]=useState("");
@@ -157,6 +163,10 @@ export default function App(){
   const [nf,setNf]=useState({name:"",amt:0,period:"เดือน",icon:"📦"});
   const chartRef=useRef(null);
   const chartInst=useRef(null);
+
+  useEffect(()=>{
+    try{localStorage.setItem("cafe_branches",JSON.stringify(branches));}catch(e){}
+  },[branches]);
   const [pdfLoading,setPdfLoading]=useState(false);
   const [pdfMsg,setPdfMsg]=useState("");
 
