@@ -257,6 +257,46 @@ const shiftFixed=[
   {id:4013,name:"ค่าเสื่อมอุปกรณ์ (เครื่องชง/บด)",amt:0,period:"เดือน",icon:"🔧"},
   {id:4014,name:"ค่าบัญชี/เบ็ดเตล็ด",amt:0,period:"เดือน",icon:"📋"},
 ];
+// สูตรเมนู สาขา 1 — จากไฟล์ต้นทุนน้ำ
+// นมมิก 1 pump = 20g, น้ำเชื่อม comp 101, น้ำร้อน/น้ำเปล่า id 2
+const branch1Menus=[
+  {id:5001,name:"อเมริกาโน่เย็น",cat:"Coffee",price:70,ings:[{type:"raw",id:7,amt:20},{type:"raw",id:2,amt:100},{type:"comp",id:101,amt:20},{type:"raw",id:1093,amt:1}]},
+  {id:5002,name:"อเมริกาโน่มะพร้าว",cat:"Coffee",price:115,ings:[{type:"raw",id:7,amt:20},{type:"raw",id:1064,amt:20},{type:"raw",id:2,amt:100},{type:"raw",id:1093,amt:1}]},
+  {id:5003,name:"อเมริกาโน่น้ำผึ้ง",cat:"Coffee",price:80,ings:[{type:"raw",id:7,amt:20},{type:"raw",id:1038,amt:45},{type:"raw",id:2,amt:100},{type:"raw",id:1093,amt:1}]},
+  {id:5004,name:"นมสดเย็น",cat:"Non-Coffee",price:70,ings:[{type:"raw",id:1042,amt:150},{type:"raw",id:1043,amt:45},{type:"raw",id:1044,amt:20},{type:"comp",id:101,amt:20},{type:"raw",id:1093,amt:1}]},
+  {id:5005,name:"นมสดคาราเมล",cat:"Non-Coffee",price:75,ings:[{type:"raw",id:1042,amt:150},{type:"raw",id:1043,amt:45},{type:"raw",id:1044,amt:20},{type:"raw",id:1098,amt:20},{type:"raw",id:1093,amt:1}]},
+  {id:5006,name:"ลาเต้เย็น",cat:"Coffee",price:85,ings:[{type:"raw",id:7,amt:20},{type:"raw",id:1042,amt:150},{type:"raw",id:1044,amt:30},{type:"raw",id:1093,amt:1}]},
+  {id:5007,name:"คาปูชิโน่เย็น",cat:"Coffee",price:85,ings:[{type:"raw",id:7,amt:20},{type:"raw",id:1042,amt:125},{type:"raw",id:1044,amt:30},{type:"raw",id:1093,amt:1}]},
+  {id:5008,name:"โกโก้เย็น",cat:"Non-Coffee",price:85,ings:[{type:"raw",id:1042,amt:125},{type:"raw",id:1061,amt:15},{type:"raw",id:1044,amt:30},{type:"raw",id:1043,amt:60},{type:"raw",id:1093,amt:1}]},
+  {id:5009,name:"มอคค่าเย็น",cat:"Coffee",price:85,ings:[{type:"raw",id:7,amt:20},{type:"raw",id:1042,amt:125},{type:"raw",id:1061,amt:5},{type:"raw",id:1044,amt:30},{type:"raw",id:1093,amt:1}]},
+  {id:5010,name:"น้ำผึ้งมะนาว",cat:"Non-Coffee",price:95,ings:[{type:"raw",id:1038,amt:45},{type:"raw",id:2,amt:150},{type:"raw",id:1055,amt:3},{type:"raw",id:1077,amt:0.2},{type:"raw",id:1093,amt:1}]},
+  {id:5011,name:"น้ำผึ้งมะนาวโซดา",cat:"Non-Coffee",price:95,ings:[{type:"raw",id:1038,amt:45},{type:"raw",id:1055,amt:3},{type:"raw",id:1097,amt:180},{type:"raw",id:1077,amt:0.2},{type:"raw",id:1093,amt:1}]},
+  {id:5012,name:"โกโก้มิ้นท์",cat:"Non-Coffee",price:95,ings:[{type:"raw",id:1042,amt:100},{type:"raw",id:1043,amt:45},{type:"raw",id:1066,amt:20},{type:"raw",id:2,amt:40},{type:"raw",id:1061,amt:8},{type:"raw",id:1093,amt:1}]},
+  {id:5013,name:"กาแฟส้ม",cat:"Coffee",price:115,ings:[{type:"raw",id:7,amt:20},{type:"raw",id:1017,amt:30},{type:"raw",id:1018,amt:30},{type:"raw",id:1097,amt:45},{type:"raw",id:2,amt:60},{type:"raw",id:1081,amt:4},{type:"raw",id:1093,amt:1}]},
+  {id:5014,name:"Peach of Tea",cat:"Non-Coffee",price:115,ings:[{type:"raw",id:1053,amt:20},{type:"raw",id:1041,amt:20},{type:"raw",id:1076,amt:60},{type:"raw",id:1054,amt:5},{type:"raw",id:2,amt:125},{type:"raw",id:1093,amt:1}]},
+  {id:5015,name:"ทีรามิสุเย็น",cat:"Coffee",price:115,ings:[{type:"raw",id:7,amt:20},{type:"raw",id:1042,amt:100},{type:"raw",id:1044,amt:30},{type:"raw",id:1061,amt:5},{type:"raw",id:1031,amt:20},{type:"raw",id:1043,amt:45},{type:"raw",id:1093,amt:1}]},
+  {id:5016,name:"นมสดสตรอว์เบอร์รี่เกาหลี",cat:"Non-Coffee",price:115,ings:[{type:"raw",id:1042,amt:125},{type:"raw",id:1044,amt:20},{type:"raw",id:1043,amt:45},{type:"comp",id:102,amt:30},{type:"raw",id:3,amt:10},{type:"raw",id:1093,amt:1}]},
+  {id:5017,name:"Blue Sky",cat:"Soda",price:85,ings:[{type:"raw",id:1047,amt:20},{type:"raw",id:1055,amt:1},{type:"raw",id:1097,amt:150},{type:"raw",id:1093,amt:1}]},
+  {id:5018,name:"มัทฉะยูซุ",cat:"Matcha",price:120,ings:[{type:"raw",id:8,amt:5},{type:"raw",id:2,amt:20},{type:"raw",id:1071,amt:30},{type:"raw",id:1010,amt:100},{type:"raw",id:1093,amt:1}]},
+  {id:5019,name:"ราสเบอร์รี่มอคค่า",cat:"Coffee",price:125,ings:[{type:"raw",id:7,amt:20},{type:"raw",id:1073,amt:20},{type:"raw",id:1090,amt:30},{type:"raw",id:1042,amt:100},{type:"raw",id:1043,amt:45},{type:"raw",id:1044,amt:30},{type:"raw",id:1088,amt:40},{type:"raw",id:1093,amt:1}]},
+  {id:5020,name:"เอสเพรซโซ่เย็น",cat:"Coffee",price:80,ings:[{type:"raw",id:7,amt:20},{type:"raw",id:1043,amt:45},{type:"raw",id:1042,amt:60},{type:"raw",id:1044,amt:30},{type:"raw",id:1093,amt:1}]},
+  {id:5021,name:"ลิ้นจี่โซดา",cat:"Soda",price:85,ings:[{type:"raw",id:1074,amt:60},{type:"raw",id:1097,amt:150},{type:"raw",id:1075,amt:40},{type:"raw",id:1093,amt:1}]},
+  {id:5022,name:"Mix Berry",cat:"Soda",price:95,ings:[{type:"raw",id:1065,amt:20},{type:"raw",id:1088,amt:15},{type:"raw",id:1097,amt:150},{type:"raw",id:1091,amt:30},{type:"raw",id:1093,amt:1}]},
+  {id:5023,name:"Yuzu Soda",cat:"Soda",price:115,ings:[{type:"raw",id:1071,amt:30},{type:"raw",id:1010,amt:150},{type:"raw",id:1093,amt:1}]},
+  {id:5024,name:"มัทฉะสตรอว์เบอร์รี่",cat:"Matcha",price:125,ings:[{type:"raw",id:8,amt:4},{type:"raw",id:1042,amt:100},{type:"raw",id:1043,amt:45},{type:"raw",id:1044,amt:30},{type:"raw",id:2,amt:50},{type:"comp",id:102,amt:40},{type:"raw",id:3,amt:5},{type:"raw",id:1093,amt:1}]},
+  {id:5025,name:"กาแฟน้ำตาลโตนด",cat:"Coffee",price:115,ings:[{type:"raw",id:7,amt:20},{type:"raw",id:1035,amt:45},{type:"raw",id:1042,amt:160},{type:"raw",id:1019,amt:5},{type:"raw",id:1093,amt:1}]},
+  {id:5026,name:"Caramel Macchiato",cat:"Coffee",price:115,ings:[{type:"raw",id:7,amt:20},{type:"raw",id:1042,amt:150},{type:"raw",id:1007,amt:20},{type:"raw",id:1044,amt:20},{type:"raw",id:1015,amt:40},{type:"raw",id:1093,amt:1}]},
+  {id:5027,name:"Smoked Oak Latte",cat:"Coffee",price:115,ings:[{type:"raw",id:7,amt:20},{type:"raw",id:1042,amt:100},{type:"raw",id:1043,amt:45},{type:"raw",id:1044,amt:30},{type:"raw",id:1061,amt:3},{type:"raw",id:1080,amt:20},{type:"raw",id:1012,amt:10},{type:"raw",id:1093,amt:1}]},
+  {id:5028,name:"มัทฉะลาเต้ Mio",cat:"Matcha",price:115,ings:[{type:"raw",id:1057,amt:5},{type:"raw",id:1042,amt:150},{type:"raw",id:1044,amt:40},{type:"raw",id:2,amt:50},{type:"raw",id:1093,amt:1}]},
+  {id:5029,name:"มัทฉะลาเต้ Hojicha",cat:"Matcha",price:95,ings:[{type:"raw",id:1056,amt:3},{type:"raw",id:1042,amt:150},{type:"raw",id:1044,amt:40},{type:"raw",id:2,amt:50},{type:"raw",id:1093,amt:1}]},
+  {id:5030,name:"มัทฉะลาเต้ House",cat:"Matcha",price:130,ings:[{type:"raw",id:1058,amt:5},{type:"raw",id:1042,amt:150},{type:"raw",id:1044,amt:40},{type:"raw",id:2,amt:50},{type:"raw",id:1093,amt:1}]},
+  {id:5031,name:"มัทฉะลาเต้ Sei",cat:"Matcha",price:140,ings:[{type:"raw",id:1059,amt:5},{type:"raw",id:1042,amt:150},{type:"raw",id:1044,amt:40},{type:"raw",id:2,amt:50},{type:"raw",id:1093,amt:1}]},
+  {id:5032,name:"มัทฉะลาเต้ Tane",cat:"Matcha",price:190,ings:[{type:"raw",id:1060,amt:5},{type:"raw",id:1042,amt:150},{type:"raw",id:1044,amt:40},{type:"raw",id:2,amt:50},{type:"raw",id:1093,amt:1}]},
+  {id:5033,name:"Yuzu Coffee",cat:"Coffee",price:115,ings:[{type:"raw",id:7,amt:20},{type:"raw",id:1071,amt:30},{type:"raw",id:1010,amt:100},{type:"raw",id:1093,amt:1}]},
+  {id:5034,name:"Molly Miga",cat:"Non-Coffee",price:115,ings:[{type:"raw",id:1036,amt:50},{type:"raw",id:1091,amt:20},{type:"raw",id:1009,amt:10},{type:"raw",id:1093,amt:1}]},
+  {id:5035,name:"Ocean Blue",cat:"Soda",price:115,ings:[{type:"raw",id:1074,amt:50},{type:"raw",id:1066,amt:15},{type:"raw",id:1097,amt:45},{type:"raw",id:1093,amt:1}]},
+  {id:5036,name:"Yuzu Popcorn",cat:"Soda",price:115,ings:[{type:"raw",id:1071,amt:30},{type:"raw",id:1050,amt:15},{type:"raw",id:1055,amt:1},{type:"raw",id:1049,amt:10},{type:"raw",id:1093,amt:1}]},
+];
 const initComps=[
   {id:101,name:"น้ำเชื่อม (โฮมเมด)",unit:"ml",yield:1500,cat:"โฮมเมด",ings:[{rmId:1,amt:1000},{rmId:2,amt:1000}]},
   {id:102,name:"แยมสตรอว์เบอร์รี่ (โฮมเมด)",unit:"g",yield:1200,cat:"โฮมเมด",ings:[{rmId:3,amt:1000},{rmId:1,amt:500}]},
@@ -364,8 +404,10 @@ export default function App(){
             let menusToAdd:any[]=[];
             let fixedToAdd:any[]=[];
             if(idx===0){
-              const existingIds=new Set((b.rms||[]).map((r:any)=>r.id));
-              rmsToAdd=initRaw.filter(r=>r.id>=1001&&!existingIds.has(r.id));
+              const existingRmIds=new Set((b.rms||[]).map((r:any)=>r.id));
+              rmsToAdd=initRaw.filter(r=>r.id>=1001&&!existingRmIds.has(r.id));
+              const existingMenuIds=new Set((b.menus||[]).map((m:any)=>m.id));
+              menusToAdd=branch1Menus.filter(m=>!existingMenuIds.has(m.id));
             } else if(idx===2){
               const existingRmIds=new Set((b.rms||[]).map((r:any)=>r.id));
               rmsToAdd=shiftRaw.filter(r=>!existingRmIds.has(r.id));
