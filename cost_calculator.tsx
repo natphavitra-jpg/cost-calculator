@@ -532,6 +532,12 @@ export default function App(){
   const chartInst=useRef(null);
   const syncTimerRef=useRef(null);
 
+  // ล็อกตอน startup ถ้าสาขา active มี PIN
+  useEffect(()=>{
+    const b=branches.find(x=>x.id===activeBranchId);
+    if(b&&b.pin){setPinModal(b.id);}
+  },[]);
+
   useEffect(()=>{
     try{localStorage.setItem("cafe_branches",JSON.stringify(branches));}catch(e){}
   },[branches]);
@@ -1497,7 +1503,7 @@ export default function App(){
       <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" key="cjs"></script>
 
       {pinModal&&(
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.55)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000}} onClick={()=>{setPinModal(null);setPinInput("");setPinError(false);}}>
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.55)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000}} onClick={()=>{if(pinModal!==activeBranchId){setPinModal(null);setPinInput("");setPinError(false);}}}>
           <div style={{background:"#fff",borderRadius:20,padding:"32px 36px",width:300,textAlign:"center",boxShadow:"0 20px 60px rgba(0,0,0,.3)"}} onClick={e=>e.stopPropagation()}>
             <div style={{fontSize:36,marginBottom:8}}>🔒</div>
             <div style={{fontWeight:600,fontSize:16,color:"#1e293b",marginBottom:4}}>{branches.find(b=>b.id===pinModal)?.name}</div>
@@ -1508,7 +1514,7 @@ export default function App(){
               onKeyDown={e=>{if(e.key==="Enter"){const b=branches.find(x=>x.id===pinModal);if(b&&b.pin===pinInput){setActiveBranchId(pinModal);setPinModal(null);setPinInput("");}else{setPinError(true);setPinInput("");}}}}/>
             {pinError&&<div style={{color:"#ef4444",fontSize:12,marginTop:8}}>รหัสไม่ถูกต้อง ลองใหม่</div>}
             <div style={{display:"flex",gap:8,marginTop:16}}>
-              <button style={{flex:1,padding:"10px",borderRadius:10,border:"1.5px solid #e2e8f0",background:"#f8fafc",cursor:"pointer",fontSize:13,color:"#64748b"}} onClick={()=>{setPinModal(null);setPinInput("");setPinError(false);}}>ยกเลิก</button>
+              {pinModal!==activeBranchId&&<button style={{flex:1,padding:"10px",borderRadius:10,border:"1.5px solid #e2e8f0",background:"#f8fafc",cursor:"pointer",fontSize:13,color:"#64748b"}} onClick={()=>{setPinModal(null);setPinInput("");setPinError(false);}}>ยกเลิก</button>}
               <button style={{flex:1,padding:"10px",borderRadius:10,border:"none",background:"#7F77DD",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:500}} onClick={()=>{const b=branches.find(x=>x.id===pinModal);if(b&&b.pin===pinInput){setActiveBranchId(pinModal);setPinModal(null);setPinInput("");}else{setPinError(true);setPinInput("");;}}}>เข้าใช้งาน</button>
             </div>
           </div>
