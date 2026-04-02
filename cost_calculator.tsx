@@ -240,6 +240,23 @@ const shiftMenus=[
   {id:3050,name:"มิกซ์เบอร์รี่โซดา",cat:"Soda & Fruit",price:70,ings:[{type:"raw",id:2024,amt:20},{type:"raw",id:2031,amt:30},{type:"raw",id:2050,amt:150}]},
   {id:3051,name:"ชาพีช",cat:"Soda & Fruit",price:80,ings:[{type:"raw",id:2015,amt:30},{type:"raw",id:2027,amt:20},{type:"raw",id:2049,amt:60},{type:"raw",id:2056,amt:100}]},
 ];
+// Fixed Cost SHIFT — สำหรับสาขา 3
+const shiftFixed=[
+  {id:4001,name:"ค่าเช่าพื้นที่ (สวนแบ่งกลางวัน)",amt:30000,period:"เดือน",icon:"🏠"},
+  {id:4002,name:"ค่าน้ำ (สวนแบ่งกลางวัน)",amt:500,period:"เดือน",icon:"💧"},
+  {id:4003,name:"ค่าไฟ (สวนแบ่งกลางวัน)",amt:10000,period:"เดือน",icon:"⚡"},
+  {id:4004,name:"เงินเดือนหัวหน้าบาริสตา",amt:15000,period:"เดือน",icon:"👤"},
+  {id:4005,name:"เงินเดือนผู้ช่วยบาริสตา 1",amt:12000,period:"เดือน",icon:"👤"},
+  {id:4006,name:"เงินเดือนผู้ช่วยบาริสตา 2",amt:12000,period:"เดือน",icon:"👤"},
+  {id:4007,name:"เงินเดือนผู้ช่วยบาริสตา 3",amt:12000,period:"เดือน",icon:"👤"},
+  {id:4008,name:"เงินเดือนผู้ช่วยบาริสตา 4",amt:12000,period:"เดือน",icon:"👤"},
+  {id:4009,name:"เงินเดือนผู้ช่วยบาริสตา 5",amt:12000,period:"เดือน",icon:"👤"},
+  {id:4010,name:"เงินเดือนผู้ช่วยบาริสตา 6",amt:12000,period:"เดือน",icon:"👤"},
+  {id:4011,name:"ประกันสังคม (นายจ้าง 5%)",amt:4350,period:"เดือน",icon:"🛡️"},
+  {id:4012,name:"ค่าอินเทอร์เน็ต (สวนแบ่ง)",amt:0,period:"เดือน",icon:"📶"},
+  {id:4013,name:"ค่าเสื่อมอุปกรณ์ (เครื่องชง/บด)",amt:0,period:"เดือน",icon:"🔧"},
+  {id:4014,name:"ค่าบัญชี/เบ็ดเตล็ด",amt:0,period:"เดือน",icon:"📋"},
+];
 const initComps=[
   {id:101,name:"น้ำเชื่อม (โฮมเมด)",unit:"ml",yield:1500,cat:"โฮมเมด",ings:[{rmId:1,amt:1000},{rmId:2,amt:1000}]},
   {id:102,name:"แยมสตรอว์เบอร์รี่ (โฮมเมด)",unit:"g",yield:1200,cat:"โฮมเมด",ings:[{rmId:3,amt:1000},{rmId:1,amt:500}]},
@@ -345,6 +362,7 @@ export default function App(){
           const migrated=parsed.map((b:any,idx:number)=>{
             let rmsToAdd:any[]=[];
             let menusToAdd:any[]=[];
+            let fixedToAdd:any[]=[];
             if(idx===0){
               const existingIds=new Set((b.rms||[]).map((r:any)=>r.id));
               rmsToAdd=initRaw.filter(r=>r.id>=1001&&!existingIds.has(r.id));
@@ -353,6 +371,8 @@ export default function App(){
               rmsToAdd=shiftRaw.filter(r=>!existingRmIds.has(r.id));
               const existingMenuIds=new Set((b.menus||[]).map((m:any)=>m.id));
               menusToAdd=shiftMenus.filter(m=>!existingMenuIds.has(m.id));
+              const existingFixedIds=new Set((b.fixed||[]).map((f:any)=>f.id));
+              fixedToAdd=shiftFixed.filter(f=>!existingFixedIds.has(f.id));
             }
             let next={...b};
             if(rmsToAdd.length>0){
@@ -362,6 +382,10 @@ export default function App(){
             if(menusToAdd.length>0){
               const merged=[...(b.menus||[]),...menusToAdd].sort((a:any,b:any)=>a.name.localeCompare(b.name,"th"));
               next={...next,menus:merged};
+            }
+            if(fixedToAdd.length>0){
+              const merged=[...(b.fixed||[]),...fixedToAdd].sort((a:any,b:any)=>a.name.localeCompare(b.name,"th"));
+              next={...next,fixed:merged};
             }
             return next;
           });
