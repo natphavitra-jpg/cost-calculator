@@ -19,6 +19,107 @@ const initRaw=[
   {id:13,name:"เนย",unit:"g",pricePerPack:125,packSize:500,cat:"เบเกอรี่"},
   {id:14,name:"ไข่ไก่",unit:"ฟอง",pricePerPack:48,packSize:12,cat:"เบเกอรี่"},
   {id:15,name:"ผงฟู",unit:"g",pricePerPack:10,packSize:100,cat:"เบเกอรี่"},
+  {id:1001,name:"กรีนแอปเปิ้ล monin",unit:"ml",pricePerPack:365,packSize:700,cat:"ไซรัป"},
+  {id:1002,name:"กระดาษ POS ปริ้นเตอร์",unit:"ชิ้น",pricePerPack:135,packSize:2,cat:"บรรจุภัณฑ์"},
+  {id:1003,name:"กระดาษปิดปากแก้ว",unit:"ใบ",pricePerPack:90,packSize:100,cat:"บรรจุภัณฑ์"},
+  {id:1004,name:"กระดาษรอง Simple",unit:"g",pricePerPack:750,packSize:500,cat:"บรรจุภัณฑ์"},
+  {id:1005,name:"กระปุกน้ำจิ้ม 2 ออน",unit:"ชิ้น",pricePerPack:28,packSize:50,cat:"บรรจุภัณฑ์"},
+  {id:1006,name:"กีวี่ monin",unit:"ml",pricePerPack:365,packSize:701,cat:"ไซรัป"},
+  {id:1007,name:"คาราเมล Monin",unit:"ml",pricePerPack:365,packSize:700,cat:"ไซรัป"},
+  {id:1008,name:"คุกกี้โลตัส บิสคอฟซอส",unit:"g",pricePerPack:215,packSize:400,cat:"เบเกอรี่"},
+  {id:1009,name:"ครีมมี่ครีมชีส",unit:"g",pricePerPack:128,packSize:400,cat:"นม"},
+  {id:1010,name:"ชเวป (กระป๋อง)",unit:"ml",pricePerPack:17,packSize:30,cat:"ของเหลว"},
+  {id:1011,name:"ชาคาโมมาย",unit:"ซอง",pricePerPack:315,packSize:25,cat:"ชา/กาแฟ"},
+  {id:1012,name:"ช็อคโกแลตคุกกี้ monin",unit:"ml",pricePerPack:365,packSize:700,cat:"ไซรัป"},
+  {id:1013,name:"ช้อนเค้ก (กลับบ้าน)",unit:"ชิ้น",pricePerPack:20,packSize:100,cat:"บรรจุภัณฑ์"},
+  {id:1014,name:"ซองครัวซองค์ (น้ำตาล)",unit:"ใบ",pricePerPack:65,packSize:50,cat:"บรรจุภัณฑ์"},
+  {id:1015,name:"ซอสคาราเมล aro",unit:"g",pricePerPack:130,packSize:1200,cat:"ซอส"},
+  {id:1016,name:"ซอสช็อคโกแลต aro",unit:"g",pricePerPack:130,packSize:1201,cat:"ซอส"},
+  {id:1017,name:"ซันควิก ส้ม mix",unit:"ml",pricePerPack:229,packSize:750,cat:"ของเหลว"},
+  {id:1018,name:"ซันควิก ส้มเข้มข้น",unit:"ml",pricePerPack:229,packSize:1000,cat:"ของเหลว"},
+  {id:1019,name:"ถั่วตุ๊ปตับ",unit:"g",pricePerPack:35,packSize:120,cat:"ท็อปปิ้ง"},
+  {id:1020,name:"ถุงกระดาษ simple",unit:"ใบ",pricePerPack:5,packSize:1,cat:"บรรจุภัณฑ์"},
+  {id:1021,name:"ถุงซาวโด",unit:"ใบ",pricePerPack:120,packSize:50,cat:"บรรจุภัณฑ์"},
+  {id:1022,name:"ถุงซิปใส่น้ำเดลิเวอรี่",unit:"ใบ",pricePerPack:45,packSize:100,cat:"บรรจุภัณฑ์"},
+  {id:1023,name:"ถุงหิ้ว 12*20",unit:"ใบ",pricePerPack:45,packSize:100,cat:"บรรจุภัณฑ์"},
+  {id:1024,name:"ถุงหิ้ว 15x22",unit:"ใบ",pricePerPack:40,packSize:100,cat:"บรรจุภัณฑ์"},
+  {id:1025,name:"ถุงหิ้ว 6*14",unit:"ใบ",pricePerPack:45,packSize:100,cat:"บรรจุภัณฑ์"},
+  {id:1026,name:"ถุงหิ้ว 8*16",unit:"ใบ",pricePerPack:45,packSize:100,cat:"บรรจุภัณฑ์"},
+  {id:1027,name:"ถุงหิ้ว 9*18",unit:"ใบ",pricePerPack:45,packSize:101,cat:"บรรจุภัณฑ์"},
+  {id:1028,name:"ถุงหิ้วแก้วคู่ (ห่อ)",unit:"ใบ",pricePerPack:45,packSize:100,cat:"บรรจุภัณฑ์"},
+  {id:1029,name:"ถุงหิ้วเดี่ยว (ห่อ)",unit:"ใบ",pricePerPack:45,packSize:100,cat:"บรรจุภัณฑ์"},
+  {id:1030,name:"ทิชชู่เช็ดปาก (แพ็ค)",unit:"แผ่น",pricePerPack:95,packSize:250,cat:"บรรจุภัณฑ์"},
+  {id:1031,name:"ทีรามิสุ monin",unit:"ml",pricePerPack:365,packSize:700,cat:"ไซรัป"},
+  {id:1032,name:"น้ำตาลทรายขาวซองเล็ก",unit:"ซอง",pricePerPack:99,packSize:300,cat:"แห้ง"},
+  {id:1033,name:"น้ำตาลทรายมิตรผล",unit:"g",pricePerPack:28,packSize:1000,cat:"แห้ง"},
+  {id:1034,name:"น้ำตาลแดงซองเล็ก",unit:"ซอง",pricePerPack:65,packSize:100,cat:"แห้ง"},
+  {id:1035,name:"น้ำตาลโตนด",unit:"g",pricePerPack:350,packSize:1500,cat:"แห้ง"},
+  {id:1036,name:"น้ำทับทิม Maree",unit:"ml",pricePerPack:79,packSize:1000,cat:"ของเหลว"},
+  {id:1037,name:"น้ำบ๋วย ดอยคำ",unit:"ml",pricePerPack:85,packSize:500,cat:"ของเหลว"},
+  {id:1038,name:"น้ำผึ้ง",unit:"g",pricePerPack:180,packSize:1000,cat:"แห้ง"},
+  {id:1039,name:"น้ำแร่ธรรมชาติ",unit:"ขวด",pricePerPack:69,packSize:12,cat:"ของเหลว"},
+  {id:1040,name:"น้ำดื่ม Simple",unit:"ขวด",pricePerPack:30,packSize:12,cat:"ของเหลว"},
+  {id:1041,name:"น้ำเสาวรส ดอยคำ",unit:"ml",pricePerPack:85,packSize:500,cat:"ของเหลว"},
+  {id:1042,name:"นม MAC MILK 2กก",unit:"ml",pricePerPack:97,packSize:2000,cat:"นม"},
+  {id:1043,name:"นมข้นจืด (กระป๋อง)",unit:"g",pricePerPack:25,packSize:385,cat:"นม"},
+  {id:1044,name:"นมข้นหวาน (ถุง 2กก)",unit:"g",pricePerPack:110,packSize:2000,cat:"นม"},
+  {id:1045,name:"บบั เบิ้ลกัม monin",unit:"ml",pricePerPack:365,packSize:702,cat:"ไซรัป"},
+  {id:1046,name:"บิสครอฟแผ่น 50ชิ้น",unit:"ชิ้น",pricePerPack:169,packSize:50,cat:"เบเกอรี่"},
+  {id:1047,name:"บลูคูลลาคาว monin",unit:"ml",pricePerPack:365,packSize:700,cat:"ไซรัป"},
+  {id:1048,name:"บ๋วยดอง",unit:"g",pricePerPack:45,packSize:320,cat:"อื่นๆ"},
+  {id:1049,name:"ป๊อปคอน",unit:"g",pricePerPack:5,packSize:80,cat:"ท็อปปิ้ง"},
+  {id:1050,name:"ป๊อปคอร์น monin",unit:"ml",pricePerPack:365,packSize:701,cat:"ไซรัป"},
+  {id:1051,name:"ป๊อปปิ้ง สตอเบอร์รี่",unit:"g",pricePerPack:195,packSize:1000,cat:"ท็อปปิ้ง"},
+  {id:1052,name:"ป๊อปปิ้งลิ้นจี่",unit:"g",pricePerPack:195,packSize:1000,cat:"ท็อปปิ้ง"},
+  {id:1053,name:"พีช monin",unit:"ml",pricePerPack:365,packSize:700,cat:"ไซรัป"},
+  {id:1054,name:"พีชเชื่อม",unit:"g",pricePerPack:130,packSize:850,cat:"ผลไม้"},
+  {id:1055,name:"ผงมะนาว (คนอร์)",unit:"g",pricePerPack:129,packSize:1000,cat:"แห้ง"},
+  {id:1056,name:"ผงมัทฉะ hojicha",unit:"g",pricePerPack:4495,packSize:1000,cat:"ชา/กาแฟ"},
+  {id:1057,name:"ผงมัทฉะ mio",unit:"g",pricePerPack:3200,packSize:1000,cat:"ชา/กาแฟ"},
+  {id:1058,name:"ผงมัทฉะ nana(House)",unit:"g",pricePerPack:5885,packSize:1000,cat:"ชา/กาแฟ"},
+  {id:1059,name:"ผงมัทฉะ sumi(Sei)",unit:"g",pricePerPack:5990,packSize:1000,cat:"ชา/กาแฟ"},
+  {id:1060,name:"ผงมัทฉะ tane(shizu)",unit:"g",pricePerPack:11555,packSize:1000,cat:"ชา/กาแฟ"},
+  {id:1061,name:"ผงโกโก้ belolade",unit:"g",pricePerPack:640,packSize:1000,cat:"ชา/กาแฟ"},
+  {id:1062,name:"ฝาโดม (แพ็ค)",unit:"ชิ้น",pricePerPack:55,packSize:50,cat:"บรรจุภัณฑ์"},
+  {id:1063,name:"ฟาวเวอร์บอสซัม monin",unit:"ml",pricePerPack:365,packSize:700,cat:"ไซรัป"},
+  {id:1064,name:"มะพร้าวไซรัป Senorita",unit:"ml",pricePerPack:180,packSize:750,cat:"ไซรัป"},
+  {id:1065,name:"มิกซ์เบอร์รี่ 1883",unit:"ml",pricePerPack:595,packSize:1000,cat:"ไซรัป"},
+  {id:1066,name:"มิ้นไซรัป Senorita",unit:"ml",pricePerPack:180,packSize:750,cat:"ไซรัป"},
+  {id:1067,name:"เมล็ดกาแฟ คั่วกลาง",unit:"g",pricePerPack:450,packSize:1000,cat:"ชา/กาแฟ"},
+  {id:1068,name:"เมล็ดกาแฟ คั่วเข้ม",unit:"g",pricePerPack:510,packSize:1000,cat:"ชา/กาแฟ"},
+  {id:1069,name:"เมล่อนไซรัป Senorita",unit:"ml",pricePerPack:180,packSize:750,cat:"ไซรัป"},
+  {id:1070,name:"โมจิโต้มิ้นท์ monin",unit:"ml",pricePerPack:365,packSize:700,cat:"ไซรัป"},
+  {id:1071,name:"ยูซุ ไซรัป Senorita",unit:"ml",pricePerPack:180,packSize:750,cat:"ไซรัป"},
+  {id:1072,name:"ราสเบอร์รี่แช่แข็ง",unit:"g",pricePerPack:268,packSize:1000,cat:"ผลไม้"},
+  {id:1073,name:"ราสเบอรี่ monin",unit:"ml",pricePerPack:365,packSize:700,cat:"ไซรัป"},
+  {id:1074,name:"ลิ้นจี่ไซรัป Senorita",unit:"ml",pricePerPack:180,packSize:750,cat:"ไซรัป"},
+  {id:1075,name:"ลิ้นจี่เชื่อมกระป๋อง",unit:"g",pricePerPack:75,packSize:565,cat:"ผลไม้"},
+  {id:1076,name:"ลิปตัน (กระป๋อง)",unit:"ml",pricePerPack:17,packSize:245,cat:"ชา/กาแฟ"},
+  {id:1077,name:"เลมอน",unit:"ลูก",pricePerPack:15,packSize:1,cat:"ผลไม้"},
+  {id:1078,name:"วาเลนเซีย",unit:"g",pricePerPack:89,packSize:1000,cat:"ผลไม้"},
+  {id:1079,name:"สตอเบอร์รี่แช่แข็ง",unit:"g",pricePerPack:99,packSize:1000,cat:"ผลไม้"},
+  {id:1080,name:"สโมคโอ๊ค monin",unit:"ml",pricePerPack:365,packSize:702,cat:"ไซรัป"},
+  {id:1081,name:"ส้มเชื่อม",unit:"g",pricePerPack:39,packSize:425,cat:"ผลไม้"},
+  {id:1082,name:"ส้อมเค้ก (กลับบ้าน)",unit:"ชิ้น",pricePerPack:20,packSize:100,cat:"บรรจุภัณฑ์"},
+  {id:1083,name:"หลอดกาแฟร้อน",unit:"ชิ้น",pricePerPack:102,packSize:400,cat:"บรรจุภัณฑ์"},
+  {id:1084,name:"หลอดเขียวใหญ่",unit:"ชิ้น",pricePerPack:25,packSize:100,cat:"บรรจุภัณฑ์"},
+  {id:1085,name:"หลอดเล็กน้ำตาล",unit:"ชิ้น",pricePerPack:16,packSize:100,cat:"บรรจุภัณฑ์"},
+  {id:1086,name:"อัญชัน monin",unit:"ml",pricePerPack:365,packSize:700,cat:"ไซรัป"},
+  {id:1087,name:"อิงลิช",unit:"ซอง",pricePerPack:315,packSize:25,cat:"ชา/กาแฟ"},
+  {id:1088,name:"เบอร์รี่รวมแช่แข็ง",unit:"g",pricePerPack:179,packSize:1000,cat:"ผลไม้"},
+  {id:1089,name:"เพียวเร่ บลูเบอรี่ monin",unit:"ml",pricePerPack:551,packSize:1000,cat:"ไซรัป"},
+  {id:1090,name:"เพียวเร่ ราสเบอรี่ monin",unit:"ml",pricePerPack:650,packSize:1000,cat:"ไซรัป"},
+  {id:1091,name:"เพียวเร่ เรดเบอรี่ monin",unit:"ml",pricePerPack:650,packSize:1000,cat:"ไซรัป"},
+  {id:1092,name:"เฟอเร่โร่ (ลูก)",unit:"ลูก",pricePerPack:20,packSize:1,cat:"ท็อปปิ้ง"},
+  {id:1093,name:"แก้ว 16 oz",unit:"ใบ",pricePerPack:2.3,packSize:1,cat:"บรรจุภัณฑ์"},
+  {id:1094,name:"แก้วร้อน 8 oz",unit:"ใบ",pricePerPack:3.4,packSize:1,cat:"บรรจุภัณฑ์"},
+  {id:1095,name:"โค้กซิโร่",unit:"ml",pricePerPack:15,packSize:325,cat:"ของเหลว"},
+  {id:1096,name:"โค้กออริ",unit:"ml",pricePerPack:15,packSize:325,cat:"ของเหลว"},
+  {id:1097,name:"โซดา (ขวด)",unit:"ml",pricePerPack:7,packSize:325,cat:"ของเหลว"},
+  {id:1098,name:"ไซรัป Molle caramal",unit:"ml",pricePerPack:159,packSize:750,cat:"ไซรัป"},
+  {id:1099,name:"ไทพีท monin",unit:"ml",pricePerPack:365,packSize:700,cat:"ไซรัป"},
+  {id:1100,name:"ไม้เสียบผลไม้",unit:"ชิ้น",pricePerPack:45,packSize:100,cat:"บรรจุภัณฑ์"},
+  {id:1101,name:"ไวท์พีท monin",unit:"ml",pricePerPack:365,packSize:700,cat:"ไซรัป"},
 ];
 const initComps=[
   {id:101,name:"น้ำเชื่อม (โฮมเมด)",unit:"ml",yield:1500,cat:"โฮมเมด",ings:[{rmId:1,amt:1000},{rmId:2,amt:1000}]},
@@ -117,7 +218,21 @@ export default function App(){
   const [branches,setBranches]=useState(()=>{
     try{
       const saved=localStorage.getItem("cafe_branches");
-      if(saved){const parsed=JSON.parse(saved);if(parsed&&parsed.length>0)return parsed;}
+      if(saved){
+        const parsed=JSON.parse(saved);
+        if(parsed&&parsed.length>0){
+          // migrate: add new PDF items to all branches if not already present
+          const newIds=new Set(initRaw.filter(r=>r.id>=1001).map(r=>r.id));
+          const migrated=parsed.map(b=>{
+            const existingIds=new Set((b.rms||[]).map((r:any)=>r.id));
+            const toAdd=initRaw.filter(r=>r.id>=1001&&!existingIds.has(r.id));
+            if(toAdd.length===0)return b;
+            const merged=[...(b.rms||[]),...toAdd].sort((a:any,b:any)=>a.name.localeCompare(b.name,"th"));
+            return{...b,rms:merged};
+          });
+          return migrated;
+        }
+      }
     }catch(e){}
     return initBranches.map(b=>({...b,sales:genSampleSales()}));
   });
