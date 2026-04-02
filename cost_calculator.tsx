@@ -668,20 +668,20 @@ export default function App(){
 
   return(
     <div style={{fontFamily:"var(--font-sans)",background:"#f8f7ff",minHeight:"100vh",padding:"0 0 3rem"}}>
-      <div style={{background:tc.color,padding:"18px 24px 0",transition:"background .3s"}}>
+      <div className="app-header" style={{background:tc.color,padding:"18px 24px 0",transition:"background .3s"}}>
         <div style={{maxWidth:1160,margin:"0 auto"}}>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+          <div className="header-top-row" style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
             <div style={{display:"flex",alignItems:"center",gap:10}}>
               <div style={{width:36,height:36,borderRadius:10,background:"rgba(255,255,255,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>☕</div>
               <div>
                 <div style={{fontSize:17,fontWeight:500,color:"#fff"}}>ระบบต้นทุนร้านเครื่องดื่ม & เบเกอรี่</div>
-                <div style={{fontSize:12,color:"rgba(255,255,255,.7)"}}>วัตถุดิบ → ของผสม → เมนู → ต้นทุน</div>
+                <div className="header-subtitle" style={{fontSize:12,color:"rgba(255,255,255,.7)"}}>วัตถุดิบ → ของผสม → เมนู → ต้นทุน</div>
               </div>
             </div>
             <div style={{display:"flex",alignItems:"center",gap:8}}>
-              {gsSyncMsg&&<span style={{fontSize:11,color:"rgba(255,255,255,.85)",background:"rgba(0,0,0,.2)",padding:"3px 10px",borderRadius:20}}>{gsSyncMsg}</span>}
+              {gsSyncMsg&&<span className="gs-sync-msg" style={{fontSize:11,color:"rgba(255,255,255,.85)",background:"rgba(0,0,0,.2)",padding:"3px 10px",borderRadius:20}}>{gsSyncMsg}</span>}
               <button onClick={()=>setShowGsSettings(!showGsSettings)} style={{padding:"6px 14px",borderRadius:20,border:"2px solid rgba(255,255,255,.4)",background:"rgba(255,255,255,.15)",color:"#fff",cursor:"pointer",fontSize:12}}>
-                ⚙️ Google Sheets
+                ⚙️<span className="gs-btn-text"> Google Sheets</span>
               </button>
             </div>
           </div>
@@ -718,19 +718,19 @@ export default function App(){
           </div>
           <div style={{display:"flex",gap:2,overflowX:"auto"}}>
             {TABS.map(t=>(
-              <button key={t.id} onClick={()=>setTab(t.id)} style={{display:"flex",alignItems:"center",gap:6,padding:"10px 18px",border:"none",background:tab===t.id?"#fff":"transparent",color:tab===t.id?tc.color:"rgba(255,255,255,.8)",cursor:"pointer",fontSize:13,fontWeight:tab===t.id?500:400,borderRadius:"8px 8px 0 0",transition:"all .15s",whiteSpace:"nowrap"}}>
-                <span style={{fontSize:14}}>{t.emoji}</span>{t.label}
+              <button key={t.id} onClick={()=>setTab(t.id)} style={{display:"flex",alignItems:"center",gap:6,padding:"10px 14px",border:"none",background:tab===t.id?"#fff":"transparent",color:tab===t.id?tc.color:"rgba(255,255,255,.8)",cursor:"pointer",fontSize:13,fontWeight:tab===t.id?500:400,borderRadius:"8px 8px 0 0",transition:"all .15s",whiteSpace:"nowrap"}}>
+                <span style={{fontSize:14}}>{t.emoji}</span><span className="tab-label">{t.label}</span>
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      <div style={{maxWidth:1160,margin:"0 auto",padding:"24px 0 0"}}>
+      <div className="main-content" style={{maxWidth:1160,margin:"0 auto",padding:"24px 16px 0"}}>
 
       {tab===0&&(
         <div>
-          <div style={{display:"flex",gap:12,flexWrap:"wrap",marginBottom:20}}>
+          <div className="stats-grid" style={{display:"flex",gap:12,flexWrap:"wrap",marginBottom:20}}>
             {[
               {l:"รายได้วันนี้",v:"฿"+fmt(dash.rev),sub:formatDateTH(todayKey),bg:"#534AB7",e:"💜"},
               {l:"ต้นทุนรวม",v:"฿"+fmt(dash.total),sub:"วัตถุดิบ+fixed",bg:"#D85A30",e:"🧾"},
@@ -746,7 +746,7 @@ export default function App(){
               </div>
             ))}
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"minmax(0,1.6fr) minmax(0,1fr)",gap:14,marginBottom:14}}>
+          <div className="dash-grid" style={{display:"grid",gridTemplateColumns:"minmax(0,1.6fr) minmax(0,1fr)",gap:14,marginBottom:14}}>
             <div style={{background:"#fff",borderRadius:14,padding:"20px 22px",border:"1.5px solid #ede9fe"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
                 <span style={{fontWeight:500,fontSize:14,color:"#1e1b4b"}}>รายได้ vs ต้นทุน รายเมนู (วันนี้)</span>
@@ -785,7 +785,7 @@ export default function App(){
           {showAddRm==="__new__"&&(
             <div style={{background:"#fff",borderRadius:14,padding:"20px 22px",border:"1.5px solid #fed7aa",marginBottom:16}}>
               <div style={{fontWeight:500,fontSize:14,color:"#7c2d12",marginBottom:12}}>เพิ่มวัตถุดิบใหม่ (หมวดใหม่)</div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr",gap:10,marginBottom:10}}>
+              <div className="form-grid-5" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr",gap:10,marginBottom:10}}>
                 {[["ชื่อวัตถุดิบ","name","text"],["ราคาต่อแพ็ค (฿)","pricePerPack","number"],["ปริมาณ","packSize","number"],["หมวดหมู่","cat","text"]].map(([l,k,t])=>(
                   <div key={k}><label style={lbl}>{l}</label><input style={inp} type={t} value={t==="number"&&nr[k]===0?"":nr[k]} onChange={e=>setNr({...nr,[k]:t==="number"?+e.target.value:e.target.value})}/></div>
                 ))}
@@ -818,7 +818,7 @@ export default function App(){
                 </div>
                 {isAdd&&(
                   <div style={{padding:"14px 20px",borderBottom:`1.5px solid ${sc.border}`,background:sc.bg+"55"}}>
-                    <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr",gap:10,marginBottom:10}}>
+                    <div className="form-grid-4" style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr",gap:10,marginBottom:10}}>
                       {[["ชื่อวัตถุดิบ","name","text"],["ราคาต่อแพ็ค (฿)","pricePerPack","number"],["ปริมาณ","packSize","number"]].map(([l,k,t])=>(
                         <div key={k}><label style={lbl}>{l}</label><input style={inp} type={t} value={t==="number"&&nr[k]===0?"":nr[k]} onChange={e=>setNr({...nr,[k]:t==="number"?+e.target.value:e.target.value})}/></div>
                       ))}
@@ -833,7 +833,7 @@ export default function App(){
                     <button style={{...btnP,background:sc.accent}} onClick={()=>{if(!nr.name)return;setRms([...rms,{...nr,id:Date.now(),cat}].sort((a,b)=>a.name.localeCompare(b.name,"th")));setNr({name:"",unit:"",pricePerPack:0,packSize:1,cat:""});setShowAddRm(false);}}>บันทึก</button>
                   </div>
                 )}
-                <table style={{width:"100%",borderCollapse:"collapse"}}>
+                <div className="table-scroll"><table style={{width:"100%",borderCollapse:"collapse",minWidth:500}}>
                   <thead><tr style={{background:"#fafafa"}}>
                     {["วัตถุดิบ","ราคาต่อแพ็ค","ปริมาณ","หน่วย","ราคาต่อหน่วย",""].map(h=><th key={h} style={th_s}>{h}</th>)}
                   </tr></thead>
@@ -857,7 +857,7 @@ export default function App(){
                       );
                     })}
                   </tbody>
-                </table>
+                </table></div>
               </div>
             );
           })}
@@ -876,7 +876,7 @@ export default function App(){
           {showAddComp&&(
             <div style={{background:"#fff",borderRadius:14,padding:"20px 22px",border:"1.5px solid #9FE1CB",marginBottom:16}}>
               <div style={{fontWeight:500,fontSize:14,color:"#064e3b",marginBottom:12}}>{editCompId?"✏️ แก้ไขของผสม":"เพิ่มของผสมใหม่"}</div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:10,marginBottom:12}}>
+              <div className="form-grid-4" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:10,marginBottom:12}}>
                 {[["ชื่อของผสม","name","text"],["หน่วย","unit","text"],["ผลผลิต (หน่วย)","yield","number"],["หมวดหมู่","cat","text"]].map(([l,k,t])=>(
                   <div key={k}><label style={lbl}>{l}</label><input style={inp} type={t} value={nc[k]} onChange={e=>setNc({...nc,[k]:t==="number"?+e.target.value:e.target.value})}/></div>
                 ))}
@@ -891,8 +891,8 @@ export default function App(){
                   </div>
                 );})}
               </div>
-              <div style={{display:"flex",gap:8,alignItems:"flex-end",marginBottom:14}}>
-                <div style={{flex:2}}><label style={lbl}>เลือกวัตถุดิบ</label>
+              <div className="ing-add-row" style={{display:"flex",gap:8,alignItems:"flex-end",marginBottom:14}}>
+                <div className="ing-select" style={{flex:2}}><label style={lbl}>เลือกวัตถุดิบ</label>
                   <select style={inp} value={ncIng.rmId} onChange={e=>setNcIng({...ncIng,rmId:+e.target.value})}>
                     <option value="">-- เลือก --</option>
                     {rms.map(r=><option key={r.id} value={r.id}>{r.name} (฿{cpuOf(r).toFixed(3)}/{r.unit})</option>)}
@@ -959,7 +959,7 @@ export default function App(){
               <div style={{fontWeight:500,fontSize:15,color:"#1e3a5f"}}>สูตรเมนูทั้งหมด</div>
               <div style={{fontSize:12,color:"#64748b",marginTop:2}}>ส่วนผสมดึงราคาจากหน้าวัตถุดิบและของผสมอัตโนมัติ</div>
             </div>
-            <div style={{display:"flex",gap:6}}>
+            <div className="filter-row" style={{display:"flex",gap:6}}>
               {["ทั้งหมด","เครื่องดื่ม","เบเกอรี่"].map(c=>(
                 <button key={c} style={{padding:"7px 16px",borderRadius:9,border:"1.5px solid "+(catF===c?tc.color:"#e2e8f0"),background:catF===c?tc.color:"#fff",color:catF===c?"#fff":"#374151",cursor:"pointer",fontSize:13,fontWeight:catF===c?500:400,transition:"all .15s"}} onClick={()=>setCatF(c)}>{c}</button>
               ))}
@@ -969,7 +969,7 @@ export default function App(){
           {showAddMenu&&(
             <div style={{background:"#fff",borderRadius:14,padding:"20px 22px",border:"1.5px solid #bfdbfe",marginBottom:16}}>
               <div style={{fontWeight:500,fontSize:14,color:"#1e3a5f",marginBottom:12}}>{editMenuId?"✏️ แก้ไขเมนู":"เพิ่มเมนูใหม่"}</div>
-              <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr",gap:10,marginBottom:14}}>
+              <div className="form-grid-3" style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr",gap:10,marginBottom:14}}>
                 <div><label style={lbl}>ชื่อเมนู</label><input style={inp} value={nm.name} onChange={e=>setNm({...nm,name:e.target.value})}/></div>
                 <div><label style={lbl}>ประเภท</label>
                   <select style={inp} value={nm.cat} onChange={e=>setNm({...nm,cat:e.target.value})}><option>เครื่องดื่ม</option><option>เบเกอรี่</option></select>
@@ -1012,11 +1012,11 @@ export default function App(){
                   );
                 })}
               </div>
-              <div style={{display:"flex",gap:8,alignItems:"flex-end",marginBottom:12}}>
-                <div style={{flex:1}}><label style={lbl}>ประเภทส่วนผสม</label>
+              <div className="ing-add-row" style={{display:"flex",gap:8,alignItems:"flex-end",marginBottom:12}}>
+                <div className="ing-type" style={{flex:1}}><label style={lbl}>ประเภทส่วนผสม</label>
                   <select style={inp} value={nmIng.type} onChange={e=>setNmIng({...nmIng,type:e.target.value,id:""})}><option value="raw">วัตถุดิบ</option><option value="comp">ของผสม</option></select>
                 </div>
-                <div style={{flex:2}}><label style={lbl}>เลือกรายการ</label>
+                <div className="ing-select" style={{flex:2}}><label style={lbl}>เลือกรายการ</label>
                   <select style={inp} value={nmIng.id} onChange={e=>setNmIng({...nmIng,id:+e.target.value})}>
                     <option value="">-- เลือก --</option>
                     {nmIng.type==="raw"?rms.map(r=><option key={r.id} value={r.id}>{r.name} (฿{cpuOf(r).toFixed(3)}/{r.unit})</option>):comps.map(c=><option key={c.id} value={c.id}>{c.name} (฿{compCpuOf(c,rms).toFixed(3)}/{c.unit})</option>)}
@@ -1102,7 +1102,7 @@ export default function App(){
               <div style={{fontWeight:500,fontSize:15,color:"#312e81"}}>ต้นทุน & Margin</div>
               <div style={{fontSize:12,color:"#64748b",marginTop:2}}>บันทึกยอดขายรายวัน · ดูสรุปรายเดือน · ย้อนหลัง 3 เดือน</div>
             </div>
-            <div style={{display:"flex",gap:6}}>
+            <div className="view-toggle" style={{display:"flex",gap:6}}>
               {[{v:"daily",l:"รายวัน"},{v:"month",l:"รายเดือน"},{v:"history",l:"ย้อนหลัง 3 เดือน"}].map(o=>(
                 <button key={o.v} style={{padding:"8px 16px",borderRadius:9,border:"1.5px solid "+(historyView===o.v?"#7F77DD":"#e2e8f0"),background:historyView===o.v?"#7F77DD":"#fff",color:historyView===o.v?"#fff":"#374151",cursor:"pointer",fontSize:13,fontWeight:historyView===o.v?500:400,transition:"all .15s"}} onClick={()=>setHistoryView(o.v)}>{o.l}</button>
               ))}
@@ -1168,7 +1168,7 @@ export default function App(){
                     </label>
                   </div>
                 </div>
-                <table style={{width:"100%",borderCollapse:"collapse"}}>
+                <div className="table-scroll"><table style={{width:"100%",borderCollapse:"collapse",minWidth:560}}>
                   <thead><tr style={{background:"#f8f9ff"}}>
                     {["เมนู","ประเภท","ราคาขาย","ต้นทุน/ชิ้น","Gross Margin","จำนวนที่ขาย","รายได้","กำไร gross"].map(h=>(
                       <th key={h} style={{...th_s,color:"#3730a3"}}>{h}</th>
@@ -1196,7 +1196,7 @@ export default function App(){
                       );
                     })}
                   </tbody>
-                </table>
+                </table></div>
               </div>
             </div>
           )}
@@ -1228,7 +1228,7 @@ export default function App(){
                 <div style={{background:"#EEF2FF",padding:"12px 16px"}}>
                   <span style={{fontWeight:500,fontSize:13,color:"#3730a3"}}>ยอดขายรายเมนู — {formatMonthTH(viewMonth)}</span>
                 </div>
-                <table style={{width:"100%",borderCollapse:"collapse"}}>
+                <div className="table-scroll"><table style={{width:"100%",borderCollapse:"collapse",minWidth:480}}>
                   <thead><tr style={{background:"#f8f9ff"}}>
                     {["เมนู","ยอดขาย (ชิ้น)","รายได้","ต้นทุน","กำไร gross","Margin"].map(h=><th key={h} style={{...th_s,color:"#3730a3"}}>{h}</th>)}
                   </tr></thead>
@@ -1249,7 +1249,7 @@ export default function App(){
                       );
                     })}
                   </tbody>
-                </table>
+                </table></div>
               </div>
             </div>
           )}
@@ -1257,7 +1257,7 @@ export default function App(){
           {historyView==="history"&&(
             <div>
               <div style={{fontWeight:500,fontSize:14,color:"#312e81",marginBottom:14}}>เปรียบเทียบ 3 เดือน</div>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14,marginBottom:20}}>
+              <div className="hist-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14,marginBottom:20}}>
                 {allMonthStats.map(({key,stats},mi)=>{
                   const sc=SC[mi%SC.length];
                   const isCurrentMonth=key===toMonthKey(today);
@@ -1322,7 +1322,7 @@ export default function App(){
           {showAddFixed&&(
             <div style={{background:"#fff",borderRadius:14,padding:"20px 22px",border:"1.5px solid #FDE68A",marginBottom:16}}>
               <div style={{fontWeight:500,fontSize:14,color:"#78350f",marginBottom:12}}>เพิ่มต้นทุนคงที่</div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:14}}>
+              <div className="form-grid-3" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:14}}>
                 <div><label style={lbl}>รายการ</label><input style={inp} value={nf.name} onChange={e=>setNf({...nf,name:e.target.value})}/></div>
                 <div><label style={lbl}>จำนวน (฿)</label><input style={inp} type="number" value={nf.amt} onChange={e=>setNf({...nf,amt:+e.target.value})}/></div>
                 <div><label style={lbl}>ช่วงเวลา</label>
@@ -1448,7 +1448,7 @@ export default function App(){
                   {rmCatsAll.map(c=><button key={c} onClick={()=>setStockCatF(c)} style={{padding:"3px 12px",borderRadius:20,border:"1.5px solid",borderColor:stockCatF===c?"#0F6E56":"#e2e8f0",background:stockCatF===c?"#0F6E56":"#fff",color:stockCatF===c?"#fff":"#64748b",fontSize:11,cursor:"pointer"}}>{c}</button>)}
                 </div>
               </div>
-              <table style={{width:"100%",borderCollapse:"collapse"}}>
+              <div className="table-scroll"><table style={{width:"100%",borderCollapse:"collapse",minWidth:480}}>
                 <thead>
                   <tr style={{background:"#f8fafc"}}>
                     {["วัตถุดิบ","หน่วย","สต๊อกปัจจุบัน","ขั้นต่ำ","สถานะ",""].map(h=><th key={h} style={{padding:"10px 14px",textAlign:"left",fontSize:11,color:"#64748b",fontWeight:500,borderBottom:"1px solid #f1f5f9"}}>{h}</th>)}
@@ -1493,7 +1493,7 @@ export default function App(){
                     );
                   })}
                 </tbody>
-              </table>
+              </table></div>
             </div>
           </div>
         );
