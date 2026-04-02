@@ -221,9 +221,9 @@ export default function App(){
       if(saved){
         const parsed=JSON.parse(saved);
         if(parsed&&parsed.length>0){
-          // migrate: add new PDF items to all branches if not already present
-          const newIds=new Set(initRaw.filter(r=>r.id>=1001).map(r=>r.id));
-          const migrated=parsed.map(b=>{
+          // migrate: add new PDF items to branch 1 only
+          const migrated=parsed.map((b:any,idx:number)=>{
+            if(idx!==0)return b;
             const existingIds=new Set((b.rms||[]).map((r:any)=>r.id));
             const toAdd=initRaw.filter(r=>r.id>=1001&&!existingIds.has(r.id));
             if(toAdd.length===0)return b;
