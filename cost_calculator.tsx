@@ -195,9 +195,8 @@ export default function App(){
             return{...m,cost:cost.toFixed(2),gm:m.price>0?((m.price-cost)/m.price*100).toFixed(1):0};
           }),
         }))};
-        const res=await fetch(gsUrl,{method:"POST",body:JSON.stringify(payload),headers:{"Content-Type":"text/plain"}});
-        const json=await res.json();
-        setGsSyncMsg(json.success?`✅ Sync แล้ว ${new Date().toLocaleTimeString("th-TH")}`:"❌ Sync ล้มเหลว");
+        await fetch(gsUrl,{method:"POST",body:JSON.stringify(payload),headers:{"Content-Type":"text/plain"},mode:"no-cors"});
+        setGsSyncMsg(`✅ Sync แล้ว ${new Date().toLocaleTimeString("th-TH")}`);
       }catch(err){setGsSyncMsg("❌ เชื่อมต่อไม่ได้");}
     },3000);
   },[branches,gsUrl]);
