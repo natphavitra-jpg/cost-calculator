@@ -174,32 +174,33 @@ export default function App(){
     try{localStorage.setItem("cafe_branches",JSON.stringify(branches));}catch(e){}
   },[branches]);
 
+  const buildPayload=()=>({branches:branches.map(b=>({
+    name:b.name,rms:b.rms,fixed:b.fixed,
+    menus:b.menus.map(m=>{
+      const cost=m.ings.reduce((s,i)=>{
+        if(i.type==="raw"){const r=b.rms.find(x=>x.id===i.id);return s+(r?(r.pricePerPack/r.packSize)*i.amt:0);}
+        const c=b.comps.find(x=>x.id===i.id);if(!c)return s;
+        const cc=c.ings.reduce((ss,ci)=>{const r=b.rms.find(x=>x.id===ci.rmId);return ss+(r?(r.pricePerPack/r.packSize)*ci.amt:0);},0);
+        return s+(c.yield>0?(cc/c.yield)*i.amt:0);
+      },0);
+      return{...m,cost:cost.toFixed(2),gm:m.price>0?((m.price-cost)/m.price*100).toFixed(1):0};
+    }),
+  }))});
+
+  const doSync=async()=>{
+    if(!gsUrl)return;
+    setGsSyncMsg("⏳ กำลัง sync...");
+    try{
+      const res=await fetch("/api/sync-sheets",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({gsUrl,payload:buildPayload()})});
+      const json=await res.json();
+      setGsSyncMsg(json.error?`❌ ${json.error}`:`✅ Sync แล้ว ${new Date().toLocaleTimeString("th-TH")}`);
+    }catch(err:any){setGsSyncMsg(`❌ ${err.message||"เชื่อมต่อไม่ได้"}`);}
+  };
+
   useEffect(()=>{
     if(!gsUrl)return;
     if(syncTimerRef.current)clearTimeout(syncTimerRef.current);
-    syncTimerRef.current=setTimeout(async()=>{
-      try{
-        setGsSyncMsg("⏳ กำลัง sync...");
-        const payload={branches:branches.map(b=>({
-          name:b.name,
-          rms:b.rms,
-          fixed:b.fixed,
-          menus:b.menus.map(m=>{
-            const cost=m.ings.reduce((s,i)=>{
-              if(i.type==="raw"){const r=b.rms.find(x=>x.id===i.id);return s+(r?(r.pricePerPack/r.packSize)*i.amt:0);}
-              const c=b.comps.find(x=>x.id===i.id);
-              if(!c)return s;
-              const cc=c.ings.reduce((ss,ci)=>{const r=b.rms.find(x=>x.id===ci.rmId);return ss+(r?(r.pricePerPack/r.packSize)*ci.amt:0);},0);
-              return s+(c.yield>0?(cc/c.yield)*i.amt:0);
-            },0);
-            return{...m,cost:cost.toFixed(2),gm:m.price>0?((m.price-cost)/m.price*100).toFixed(1):0};
-          }),
-        }))};
-        const res=await fetch("/api/sync-sheets",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({gsUrl,payload})});
-        const json=await res.json();
-        setGsSyncMsg(json.error?`❌ ${json.error}`:`✅ Sync แล้ว ${new Date().toLocaleTimeString("th-TH")}`);
-      }catch(err){setGsSyncMsg("❌ เชื่อมต่อไม่ได้");}
-    },3000);
+    syncTimerRef.current=setTimeout(doSync,3000);
   },[branches,gsUrl]);
 
   const fixedPD=fixed.reduce((s,f)=>s+(f.period==="วัน"?f.amt:f.period==="เดือน"?f.amt/30:f.amt/365),0);
@@ -323,6 +324,7 @@ export default function App(){
                 <input style={{...inp,background:"rgba(255,255,255,.9)",fontSize:12}} placeholder="https://script.google.com/macros/s/..." value={gsUrl} onChange={e=>{setGsUrl(e.target.value);try{localStorage.setItem("cafe_gs_url",e.target.value);}catch(ex){}}}/>
               </div>
               <button style={{padding:"8px 16px",borderRadius:9,background:"#fff",border:"none",color:"#534AB7",cursor:"pointer",fontSize:12,fontWeight:500}} onClick={()=>setShowGsSettings(false)}>บันทึก ✓</button>
+              <button style={{padding:"8px 16px",borderRadius:9,background:"#1D9E75",border:"none",color:"#fff",cursor:"pointer",fontSize:12,fontWeight:500}} onClick={()=>{setShowGsSettings(false);doSync();}}>🔄 Sync ทันที</button>
               <a href="https://script.google.com" target="_blank" rel="noreferrer" style={{padding:"8px 16px",borderRadius:9,background:"rgba(255,255,255,.15)",border:"1.5px solid rgba(255,255,255,.3)",color:"#fff",cursor:"pointer",fontSize:12,textDecoration:"none"}}>เปิด Apps Script ↗</a>
             </div>
           )}
