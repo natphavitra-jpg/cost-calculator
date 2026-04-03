@@ -523,6 +523,8 @@ export default function App(){
   const [stockCatF,setStockCatF]=useState("ทั้งหมด");
   const [editStockId,setEditStockId]=useState(null);
   const [addAmt,setAddAmt]=useState(0);
+  const [rmSearch,setRmSearch]=useState("");
+  const [compRmSearch,setCompRmSearch]=useState("");
   const [pdfLoading,setPdfLoading]=useState(false);
   const [pdfMsg,setPdfMsg]=useState("");
   const [gsUrl,setGsUrl]=useState(()=>{try{return localStorage.getItem("cafe_gs_url")||"";}catch(e){return "";}});
@@ -893,9 +895,10 @@ export default function App(){
               </div>
               <div className="ing-add-row" style={{display:"flex",gap:8,alignItems:"flex-end",marginBottom:14}}>
                 <div className="ing-select" style={{flex:2}}><label style={lbl}>เลือกวัตถุดิบ</label>
+                  <input style={{...inp,marginBottom:4}} placeholder="🔍 ค้นหาวัตถุดิบ..." value={compRmSearch} onChange={e=>setCompRmSearch(e.target.value)}/>
                   <select style={inp} value={ncIng.rmId} onChange={e=>setNcIng({...ncIng,rmId:+e.target.value})}>
                     <option value="">-- เลือก --</option>
-                    {rms.map(r=><option key={r.id} value={r.id}>{r.name} (฿{cpuOf(r).toFixed(3)}/{r.unit})</option>)}
+                    {rms.filter(r=>!compRmSearch||r.name.toLowerCase().includes(compRmSearch.toLowerCase())).map(r=><option key={r.id} value={r.id}>{r.name} (฿{cpuOf(r).toFixed(3)}/{r.unit})</option>)}
                   </select>
                 </div>
                 <div style={{flex:1}}><label style={lbl}>จำนวน</label><input style={inp} type="number" value={ncIng.amt} onChange={e=>setNcIng({...ncIng,amt:+e.target.value})}/></div>
@@ -1017,9 +1020,12 @@ export default function App(){
                   <select style={inp} value={nmIng.type} onChange={e=>setNmIng({...nmIng,type:e.target.value,id:""})}><option value="raw">วัตถุดิบ</option><option value="comp">ของผสม</option></select>
                 </div>
                 <div className="ing-select" style={{flex:2}}><label style={lbl}>เลือกรายการ</label>
-                  <select style={inp} value={nmIng.id} onChange={e=>setNmIng({...nmIng,id:+e.target.value})}>
+                  <input style={{...inp,marginBottom:4}} placeholder="🔍 ค้นหา..." value={rmSearch} onChange={e=>setRmSearch(e.target.value)}/>
+                  <select style={inp} value={nmIng.id} onChange={e=>{setNmIng({...nmIng,id:+e.target.value});setRmSearch("");}}>
                     <option value="">-- เลือก --</option>
-                    {nmIng.type==="raw"?rms.map(r=><option key={r.id} value={r.id}>{r.name} (฿{cpuOf(r).toFixed(3)}/{r.unit})</option>):comps.map(c=><option key={c.id} value={c.id}>{c.name} (฿{compCpuOf(c,rms).toFixed(3)}/{c.unit})</option>)}
+                    {nmIng.type==="raw"
+                      ?rms.filter(r=>!rmSearch||r.name.toLowerCase().includes(rmSearch.toLowerCase())).map(r=><option key={r.id} value={r.id}>{r.name} (฿{cpuOf(r).toFixed(3)}/{r.unit})</option>)
+                      :comps.filter(c=>!rmSearch||c.name.toLowerCase().includes(rmSearch.toLowerCase())).map(c=><option key={c.id} value={c.id}>{c.name} (฿{compCpuOf(c,rms).toFixed(3)}/{c.unit})</option>)}
                   </select>
                 </div>
                 <div style={{flex:1}}><label style={lbl}>ปริมาณ</label>
