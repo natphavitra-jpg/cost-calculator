@@ -1101,16 +1101,24 @@ export default function App(){
                       <div style={{textAlign:"center"}}><Ring p={gm*100} color={mColor(gm)}/><div style={{fontSize:10,color:mColor(gm),fontWeight:500,marginTop:2}}>Gross</div></div>
                       <div style={{textAlign:"right"}}><div style={{fontSize:11,color:"#64748b"}}>Gross Margin</div><div style={{fontWeight:500,fontSize:18,color:mColor(gm)}}>{pct(gm)}</div></div>
                     </div>
-                    {fixedPerUnit>0&&(
+                    {fixedPD>0&&(
                       <div style={{marginTop:8,paddingTop:8,borderTop:"1px dashed #e2e8f0",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                        <div>
-                          <div style={{fontSize:11,color:"#64748b"}}>+ FC <span style={{color:"#94a3b8",fontSize:10}}>≈฿{fixedPerUnit.toFixed(2)}/ชิ้น</span></div>
-                          <div style={{fontWeight:500,fontSize:13,color:"#374151"}}>ต้นทุนรวม ฿{totalCost.toFixed(2)}</div>
-                        </div>
-                        <div style={{textAlign:"right"}}>
-                          <div style={{fontSize:11,color:"#64748b"}}>Net Margin</div>
-                          <div style={{fontWeight:600,fontSize:18,color:mColor(netGm)}}>{pct(netGm)}</div>
-                        </div>
+                        {avgDailyUnits>0?(
+                          <>
+                            <div>
+                              <div style={{fontSize:11,color:"#64748b"}}>+ FC <span style={{color:"#94a3b8",fontSize:10}}>≈฿{fixedPerUnit.toFixed(2)}/ชิ้น</span></div>
+                              <div style={{fontWeight:500,fontSize:13,color:"#374151"}}>ต้นทุนรวม ฿{totalCost.toFixed(2)}</div>
+                            </div>
+                            <div style={{textAlign:"right"}}>
+                              <div style={{fontSize:11,color:"#64748b"}}>Net Margin</div>
+                              <div style={{fontWeight:600,fontSize:18,color:mColor(netGm)}}>{pct(netGm)}</div>
+                            </div>
+                          </>
+                        ):(
+                          <div style={{fontSize:11,color:"#94a3b8"}}>
+                            FC/วัน ฿{fmt(fixedPD,0)} · <span style={{color:"#BA7517"}}>กรอกยอดขายในหน้า 💰 เพื่อคำนวณ FC/ชิ้น</span>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
