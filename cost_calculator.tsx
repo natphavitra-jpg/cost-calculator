@@ -575,6 +575,15 @@ export default function App(){
 
   const fixedPD=fixed.reduce((s,f)=>s+(f.period==="วัน"?f.amt:f.period==="เดือน"?f.amt/30:f.amt/365),0);
 
+  // เฉลี่ยจำนวนชิ้นที่ขายต่อวัน (30 วันล่าสุด) เพื่อแบ่ง Fixed Cost ต่อชิ้น
+  const avgDailyUnits=useMemo(()=>{
+    const keys=Object.keys(salesData||{}).sort().slice(-30);
+    if(!keys.length)return 0;
+    const total=keys.reduce((s,k)=>s+menus.reduce((ms,m)=>ms+(salesData[k]?.[m.id]||0),0),0);
+    return total/keys.length;
+  },[salesData,menus]);
+  const fixedPerUnit=avgDailyUnits>0?fixedPD/avgDailyUnits:0;
+
   const getDaySales=key=>salesData[key]||{};
   const setDaySales=(key,mid,qty)=>_upBranch("sales",prev=>({...prev,[key]:{...(prev[key]||{}),[mid]:qty}}));
 
@@ -1058,6 +1067,7 @@ export default function App(){
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(290px,1fr))",gap:14}}>
             {menus.filter(m=>catF==="ทั้งหมด"||m.cat===catF).map((menu,mi)=>{
               const cost=menuCost(menu,rms,comps),gm=(menu.price-cost)/menu.price;
+              const totalCost=cost+fixedPerUnit,netGm=menu.price>0?(menu.price-totalCost)/menu.price:0;
               const sc=SC[mi%SC.length];
               return(
                 <div key={menu.id} style={{background:"#fff",borderRadius:14,overflow:"hidden",border:`1.5px solid ${sc.border}`}}>
@@ -1085,10 +1095,24 @@ export default function App(){
                       );
                     })}
                   </div>
-                  <div style={{padding:"12px 18px",background:"#fafafa",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                    <div><div style={{fontSize:11,color:"#64748b"}}>ต้นทุนวัตถุดิบ</div><div style={{fontWeight:500,fontSize:17,color:"#1e293b"}}>฿{cost.toFixed(2)}</div></div>
-                    <div style={{textAlign:"center"}}><Ring p={gm*100} color={mColor(gm)}/><div style={{fontSize:10,color:mColor(gm),fontWeight:500,marginTop:2}}>{mLabel(gm)}</div></div>
-                    <div style={{textAlign:"right"}}><div style={{fontSize:11,color:"#64748b"}}>Gross Margin</div><div style={{fontWeight:500,fontSize:20,color:mColor(gm)}}>{pct(gm)}</div></div>
+                  <div style={{padding:"12px 18px",background:"#fafafa"}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                      <div><div style={{fontSize:11,color:"#64748b"}}>ต้นทุนวัตถุดิบ</div><div style={{fontWeight:500,fontSize:16,color:"#1e293b"}}>฿{cost.toFixed(2)}</div></div>
+                      <div style={{textAlign:"center"}}><Ring p={gm*100} color={mColor(gm)}/><div style={{fontSize:10,color:mColor(gm),fontWeight:500,marginTop:2}}>Gross</div></div>
+                      <div style={{textAlign:"right"}}><div style={{fontSize:11,color:"#64748b"}}>Gross Margin</div><div style={{fontWeight:500,fontSize:18,color:mColor(gm)}}>{pct(gm)}</div></div>
+                    </div>
+                    {fixedPerUnit>0&&(
+                      <div style={{marginTop:8,paddingTop:8,borderTop:"1px dashed #e2e8f0",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                        <div>
+                          <div style={{fontSize:11,color:"#64748b"}}>+ FC <span style={{color:"#94a3b8",fontSize:10}}>≈฿{fixedPerUnit.toFixed(2)}/ชิ้น</span></div>
+                          <div style={{fontWeight:500,fontSize:13,color:"#374151"}}>ต้นทุนรวม ฿{totalCost.toFixed(2)}</div>
+                        </div>
+                        <div style={{textAlign:"right"}}>
+                          <div style={{fontSize:11,color:"#64748b"}}>Net Margin</div>
+                          <div style={{fontWeight:600,fontSize:18,color:mColor(netGm)}}>{pct(netGm)}</div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div style={{padding:"10px 18px",borderTop:"1px solid #f1f5f9",display:"flex",gap:8,justifyContent:"flex-end"}}>
                     <button style={btnSm} onClick={()=>{setEditMenuId(menu.id);setNm({name:menu.name,cat:menu.cat,price:menu.price,ings:menu.ings.map(i=>({...i}))});setNmIng({type:"raw",id:"",amt:0});setShowAddMenu(true);window.scrollTo({top:0,behavior:"smooth"});}}>✏️ แก้ไข</button>
@@ -1176,28 +1200,30 @@ export default function App(){
                 </div>
                 <div className="table-scroll"><table style={{width:"100%",borderCollapse:"collapse",minWidth:560}}>
                   <thead><tr style={{background:"#f8f9ff"}}>
-                    {["เมนู","ประเภท","ราคาขาย","ต้นทุน/ชิ้น","Gross Margin","จำนวนที่ขาย","รายได้","กำไร gross"].map(h=>(
+                    {["เมนู","ประเภท","ราคาขาย","ต้นทุน+FC/ชิ้น","GM","Net Margin","จำนวนที่ขาย","รายได้","กำไร Net"].map(h=>(
                       <th key={h} style={{...th_s,color:"#3730a3"}}>{h}</th>
                     ))}
                   </tr></thead>
                   <tbody>
                     {menus.map(m=>{
                       const cost=menuCost(m,rms,comps),gm=(m.price-cost)/m.price;
+                      const totalCostU=cost+fixedPerUnit,netGm=m.price>0?(m.price-totalCostU)/m.price:0;
                       const qty=getDaySales(selectedDate)[m.id]||0;
-                      const rev=m.price*qty,gp=(m.price-cost)*qty;
+                      const rev=m.price*qty,netProfit=(m.price-totalCostU)*qty;
                       return(
                         <tr key={m.id} style={{borderBottom:"1px solid #f1f5f9"}}>
                           <td style={td_s}><span style={{fontWeight:500,color:"#1e293b"}}>{m.name}</span></td>
                           <td style={td_s}><span style={{background:m.cat==="เครื่องดื่ม"?"#EDE9FE":"#D1FAE5",color:m.cat==="เครื่องดื่ม"?"#4C1D95":"#065f46",padding:"1px 8px",borderRadius:20,fontSize:11,fontWeight:500}}>{m.cat}</span></td>
                           <td style={td_s}>฿{m.price}</td>
-                          <td style={td_s}>฿{cost.toFixed(2)}</td>
-                          <td style={td_s}><span style={{fontWeight:500,color:mColor(gm)}}>{pct(gm)}</span></td>
+                          <td style={td_s}><span style={{fontSize:12}}>฿{cost.toFixed(2)}<br/><span style={{color:"#94a3b8",fontSize:11}}>+FC ฿{fixedPerUnit.toFixed(2)}</span><br/><b>฿{totalCostU.toFixed(2)}</b></span></td>
+                          <td style={td_s}><span style={{color:mColor(gm),fontWeight:500}}>{pct(gm)}</span></td>
+                          <td style={td_s}><span style={{fontWeight:600,color:mColor(netGm)}}>{pct(netGm)}</span></td>
                           <td style={td_s}>
                             <input type="number" min="0" style={{...inp,width:70,textAlign:"center"}} value={qty}
                               onChange={e=>setDaySales(selectedDate,m.id,+e.target.value)}/>
                           </td>
                           <td style={{...td_s,fontWeight:500,color:"#7F77DD"}}>฿{fmt(rev)}</td>
-                          <td style={{...td_s,fontWeight:500,color:gp>=0?"#1D9E75":"#E24B4A"}}>฿{fmt(gp)}</td>
+                          <td style={{...td_s,fontWeight:500,color:netProfit>=0?"#1D9E75":"#E24B4A"}}>฿{fmt(netProfit)}</td>
                         </tr>
                       );
                     })}
