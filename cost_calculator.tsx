@@ -478,10 +478,10 @@ export default function App(){
   };
 
   const sendTelegram=async(message:string)=>{
-    const tok=localStorage.getItem("cafe_tg_token")||"";
-    const cid=localStorage.getItem("cafe_tg_chatid")||"";
+    const tok=(localStorage.getItem("cafe_tg_token")||"").trim();
+    const cid=(localStorage.getItem("cafe_tg_chatid")||"").trim();
     if(!tok||!cid)return;
-    try{await fetch(`/tg-proxy/bot${tok}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:cid,text:message,parse_mode:"HTML"})});}catch(e){}
+    try{await fetch("/api/telegram",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token:tok,chatId:cid,message})});}catch(e){}
   };
 
   const deductStockForDate=(dateKey)=>{
@@ -756,20 +756,22 @@ export default function App(){
             <div style={{background:"rgba(0,0,0,.25)",borderRadius:12,padding:"14px 16px",marginBottom:12,display:"flex",gap:10,alignItems:"flex-end",flexWrap:"wrap"}}>
               <div style={{flex:1,minWidth:200}}>
                 <div style={{fontSize:11,color:"rgba(255,255,255,.7)",marginBottom:4}}>Bot Token</div>
-                <input style={{...inp,background:"rgba(255,255,255,.9)",fontSize:12}} placeholder="1234567890:AAH..." value={tgToken} onChange={e=>{setTgToken(e.target.value);try{localStorage.setItem("cafe_tg_token",e.target.value);}catch(ex){}}}/>
+                <input style={{...inp,background:"rgba(255,255,255,.9)",fontSize:12}} placeholder="1234567890:AAH..." value={tgToken} onChange={e=>{const v=e.target.value.trim();setTgToken(v);try{localStorage.setItem("cafe_tg_token",v);}catch(ex){}}}/>
               </div>
               <div style={{flex:1,minWidth:140}}>
                 <div style={{fontSize:11,color:"rgba(255,255,255,.7)",marginBottom:4}}>Chat ID</div>
-                <input style={{...inp,background:"rgba(255,255,255,.9)",fontSize:12}} placeholder="8668867696" value={tgChatId} onChange={e=>{setTgChatId(e.target.value);try{localStorage.setItem("cafe_tg_chatid",e.target.value);}catch(ex){}}}/>
+                <input style={{...inp,background:"rgba(255,255,255,.9)",fontSize:12}} placeholder="8668867696" value={tgChatId} onChange={e=>{const v=e.target.value.trim();setTgChatId(v);try{localStorage.setItem("cafe_tg_chatid",v);}catch(ex){}}}/>
               </div>
               <button style={{padding:"8px 16px",borderRadius:9,background:"#fff",border:"none",color:"#534AB7",cursor:"pointer",fontSize:12,fontWeight:500}} onClick={()=>setShowTgSettings(false)}>บันทึก ✓</button>
               <button style={{padding:"8px 16px",borderRadius:9,background:"#1D9E75",border:"none",color:"#fff",cursor:"pointer",fontSize:12,fontWeight:500}} onClick={async()=>{
                 if(!tgToken||!tgChatId){setTgMsg("❌ กรุณาใส่ Token และ Chat ID");setTimeout(()=>setTgMsg(""),4000);return;}
                 setTgMsg("⏳ กำลังทดสอบ...");
                 try{
-                  const r=await fetch(`/tg-proxy/bot${tgToken}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:tgChatId,text:"✅ เชื่อมต่อ Telegram สำเร็จ!\nระบบแจ้งเตือนสต๊อกพร้อมใช้งานแล้ว",parse_mode:"HTML"})});
+                  const tok=tgToken.trim();
+                  const cid=tgChatId.trim();
+                  const r=await fetch("/api/telegram",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token:tok,chatId:cid,message:"test: เชื่อมต่อ Telegram สำเร็จ"})});
                   const d=await r.json();
-                  setTgMsg(d.ok?"✅ ส่งสำเร็จ":`❌ ${d.description||"ส่งไม่ได้"}`);
+                  setTgMsg(d.success?"✅ ส่งสำเร็จ":`❌ ${d.error||"ส่งไม่ได้"}`);
                 }catch(e:any){setTgMsg(`❌ Network error: ${e.message}`);}
                 setTimeout(()=>setTgMsg(""),4000);
               }}>📤 ทดสอบส่ง</button>
