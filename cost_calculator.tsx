@@ -487,40 +487,38 @@ export default function App(){
   const deductStockForDate=(dateKey)=>{
     if(stockDeducted[dateKey])return;
     const usage=calcDailyUsage(dateKey);
-    setStock((prev:any)=>{
-      const next={...prev};
-      Object.entries(usage).forEach(([id,amt])=>{next[id]=(next[id]||0)-amt;});
 
-      // สร้างข้อความแจ้งเตือน Telegram
-      const d=dateKey.split("-");
-      const dateStr=`${d[2]}/${d[1]}/${(+d[0]+543).toString().slice(-2)}`;
-      const lines:string[]=[];
-      lines.push(`✂️ <b>ตัดสต๊อกแล้ว</b> — ${dateStr}\n`);
-
-      const deducted=Object.entries(usage).filter(([,a])=>(a as number)>0);
-      if(deducted.length){
-        lines.push("📦 <b>รายการที่ตัด:</b>");
-        deducted.forEach(([id,amt])=>{
-          const r=rms.find((x:any)=>x.id===+id);
-          if(r){const remain=Math.max(0,(next[+id]||0));lines.push(`  • ${r.name}: -${amt}${r.unit} (คงเหลือ ${remain}${r.unit})`);}
-        });
-      }
-
-      const low=rms.filter((r:any)=>stockMin[r.id]&&(next[r.id]||0)<stockMin[r.id]);
-      if(low.length){
-        lines.push(`\n⚠️ <b>สต๊อกต่ำกว่าขั้นต่ำ (${low.length} รายการ):</b>`);
-        low.forEach((r:any)=>{lines.push(`  • ${r.name}: ${next[r.id]||0}${r.unit} / ขั้นต่ำ ${stockMin[r.id]}${r.unit}`);});
-      }
-      const out=rms.filter((r:any)=>stockMin[r.id]&&(next[r.id]||0)<=0);
-      if(out.length){
-        lines.push(`\n🚨 <b>หมดสต๊อก (${out.length} รายการ):</b>`);
-        out.forEach((r:any)=>{lines.push(`  • ${r.name}`);});
-      }
-
-      sendTelegram(lines.join("\n"));
-      return next;
-    });
+    // คำนวณ stock ใหม่ก่อน
+    const nextStock={...stock};
+    Object.entries(usage).forEach(([id,amt])=>{nextStock[+id]=(nextStock[+id]||0)-(amt as number);});
+    setStock(nextStock);
     setStockDeducted((prev:any)=>({...prev,[dateKey]:true}));
+
+    // สร้างและส่งข้อความ Telegram หลัง state update
+    const d=dateKey.split("-");
+    const dateStr=`${d[2]}/${d[1]}/${(+d[0]+543).toString().slice(-2)}`;
+    const lines:string[]=[];
+    lines.push(`✂️ <b>ตัดสต๊อกแล้ว</b> — ${dateStr}\n`);
+
+    const deducted=Object.entries(usage).filter(([,a])=>(a as number)>0);
+    if(deducted.length){
+      lines.push("📦 <b>รายการที่ตัด:</b>");
+      deducted.forEach(([id,amt])=>{
+        const r=rms.find((x:any)=>x.id===+id);
+        if(r){const remain=Math.max(0,(nextStock[+id]||0));lines.push(`  • ${r.name}: -${Number(amt).toFixed(1)}${r.unit} (คงเหลือ ${remain.toFixed(1)}${r.unit})`);}
+      });
+    }
+    const low=rms.filter((r:any)=>stockMin[r.id]&&(nextStock[r.id]||0)<stockMin[r.id]&&(nextStock[r.id]||0)>0);
+    if(low.length){
+      lines.push(`\n⚠️ <b>สต๊อกต่ำกว่าขั้นต่ำ (${low.length} รายการ):</b>`);
+      low.forEach((r:any)=>{lines.push(`  • ${r.name}: ${(nextStock[r.id]||0).toFixed(1)}${r.unit} / ขั้นต่ำ ${stockMin[r.id]}${r.unit}`);});
+    }
+    const out=rms.filter((r:any)=>stockMin[r.id]&&(nextStock[r.id]||0)<=0);
+    if(out.length){
+      lines.push(`\n🚨 <b>หมดสต๊อก (${out.length} รายการ):</b>`);
+      out.forEach((r:any)=>{lines.push(`  • ${r.name}`);});
+    }
+    sendTelegram(lines.join("\n"));
   };
 
   const [selectedDate,setSelectedDate]=useState(todayKey);
