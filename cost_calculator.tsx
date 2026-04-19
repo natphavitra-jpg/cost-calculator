@@ -598,6 +598,14 @@ export default function App(){
     syncTimerRef.current=setTimeout(doSync,10000);
   },[branches,gsUrl]);
 
+  const syncStockToRedis=()=>{
+    const now=new Date();
+    const updatedAt=`${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()+543} ${now.toLocaleTimeString("th-TH")}`;
+    fetch("/api/stock-sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({stock,stockMin,rms,updatedAt})}).catch(()=>{});
+  };
+
+  useEffect(()=>{syncStockToRedis();},[]);
+
   const fixedPD=fixed.reduce((s,f)=>s+(f.period==="วัน"?f.amt:f.period==="เดือน"?f.amt/30:f.amt/365),0);
 
   // เฉลี่ยจำนวนชิ้นที่ขายต่อวัน (30 วันล่าสุด) เพื่อแบ่ง Fixed Cost ต่อชิ้น
@@ -1510,9 +1518,10 @@ export default function App(){
                 <div style={{fontWeight:500,fontSize:15,color:"#0F6E56"}}>📦 จัดการสต๊อกวัตถุดิบ</div>
                 <div style={{fontSize:12,color:"#64748b",marginTop:2}}>ตั้งจำนวนสต๊อก → ยืนยันยอดขาย → ระบบตัดสต๊อกอัตโนมัติ</div>
               </div>
-              <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+              <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center"}}>
                 {lowCount>0&&<div style={{background:"#FEF3C7",color:"#92400e",padding:"6px 14px",borderRadius:20,fontSize:12,fontWeight:500}}>⚠️ ใกล้หมด {lowCount} รายการ</div>}
                 {outCount>0&&<div style={{background:"#FEE2E2",color:"#991b1b",padding:"6px 14px",borderRadius:20,fontSize:12,fontWeight:500}}>🔴 หมดแล้ว {outCount} รายการ</div>}
+                <button style={{padding:"6px 14px",borderRadius:20,background:"#E1F5EE",border:"1.5px solid #9FE1CB",color:"#0F6E56",fontSize:12,cursor:"pointer",fontWeight:500}} onClick={()=>{syncStockToRedis();alert("✅ Sync สต๊อกขึ้น Telegram Bot แล้ว");}}>📤 Sync สต๊อก → Bot</button>
               </div>
             </div>
 
