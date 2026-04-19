@@ -1,0 +1,13 @@
+name: Telegram Bot Poll
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Poll Telegram Bot
+        run: curl -s "https://cost-calculator-rho.vercel.app/api/telegram-poll"
