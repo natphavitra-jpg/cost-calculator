@@ -1,8 +1,7 @@
 {
-  "crons": [
-    {
-      "path": "/api/telegram-poll",
-      "schedule": "* * * * *"
+  "functions": {
+    "app/api/**": {
+      "maxDuration": 30
     }
-  ]
+  }
 }
