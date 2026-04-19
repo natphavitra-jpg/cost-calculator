@@ -494,6 +494,11 @@ export default function App(){
     setStock(nextStock);
     setStockDeducted((prev:any)=>({...prev,[dateKey]:true}));
 
+    // sync stock ขึ้น server
+    const now=new Date();
+    const updatedAt=`${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()+543} ${now.toLocaleTimeString("th-TH")}`;
+    fetch("/api/stock-sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({stock:nextStock,stockMin,rms,updatedAt})}).catch(()=>{});
+
     // สร้างและส่งข้อความ Telegram หลัง state update
     const d=dateKey.split("-");
     const dateStr=`${d[2]}/${d[1]}/${(+d[0]+543).toString().slice(-2)}`;

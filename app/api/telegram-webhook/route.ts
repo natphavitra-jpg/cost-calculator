@@ -1,0 +1,86 @@
+import { NextRequest, NextResponse } from "next/server";
+
+const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL || "";
+const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || "";
+
+async function redisGet(key: string): Promise<any> {
+  const res = await fetch(`${REDIS_URL}/get/${key}`, {
+    headers: { Authorization: `Bearer ${REDIS_TOKEN}` },
+  });
+  const data = await res.json();
+  return data.result ? JSON.parse(data.result) : null;
+}
+
+async function sendTg(token: string, chatId: string, text: string) {
+  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chat_id: chatId, text, parse_mode: "HTML" }),
+  });
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const msg = body?.message;
+    if (!msg) return NextResponse.json({ ok: true });
+
+    const chatId = msg.chat?.id?.toString();
+    const text = (msg.text || "").trim().toLowerCase();
+    const token = process.env.TG_BOT_TOKEN || "";
+
+    if (!token || !chatId) return NextResponse.json({ ok: true });
+
+    const data = await redisGet("cafe_stock_data");
+
+    if (text === "สต๊อก" || text === "stock" || text === "คงเหลือ") {
+      if (!data) {
+        await sendTg(token, chatId, "⚠️ ยังไม่มีข้อมูลสต๊อก\nกรุณาเปิดแอปและกดตัดสต๊อกก่อน");
+        return NextResponse.json({ ok: true });
+      }
+      const { stock, stockMin, rms, updatedAt } = data;
+      const lines: string[] = [`📦 <b>สต๊อกปัจจุบัน</b>\nอัพเดต: ${updatedAt}\n`];
+      rms.forEach((r: any) => {
+        const cur = stock[r.id] || 0;
+        const min = stockMin[r.id] || 0;
+        if (cur > 0 || min > 0) {
+          const status = min > 0 ? (cur <= 0 ? "🚨" : cur < min ? "⚠️" : "✅") : "";
+          lines.push(`${status} ${r.name}: ${cur.toFixed(1)}${r.unit}${min > 0 ? ` (ขั้นต่ำ ${min})` : ""}`);
+        }
+      });
+      await sendTg(token, chatId, lines.join("\n"));
+
+    } else if (text === "สต๊อกต่ำ" || text === "ต่ำ" || text === "low") {
+      if (!data) {
+        await sendTg(token, chatId, "⚠️ ยังไม่มีข้อมูลสต๊อก");
+        return NextResponse.json({ ok: true });
+      }
+      const { stock, stockMin, rms } = data;
+      const low = rms.filter((r: any) => stockMin[r.id] && (stock[r.id] || 0) < stockMin[r.id]);
+      if (!low.length) {
+        await sendTg(token, chatId, "✅ สต๊อกทุกรายการอยู่ในระดับปกติ");
+      } else {
+        const lines = [`⚠️ <b>สต๊อกต่ำกว่าขั้นต่ำ (${low.length} รายการ)</b>\n`];
+        low.forEach((r: any) => {
+          const cur = stock[r.id] || 0;
+          const icon = cur <= 0 ? "🚨" : "⚠️";
+          lines.push(`${icon} ${r.name}: ${cur.toFixed(1)}${r.unit} / ขั้นต่ำ ${stockMin[r.id]}${r.unit}`);
+        });
+        await sendTg(token, chatId, lines.join("\n"));
+      }
+
+    } else if (text === "help" || text === "ช่วยเหลือ" || text === "/start") {
+      await sendTg(token, chatId,
+        "☕ <b>Simple Cafe Alert Bot</b>\n\nคำสั่งที่ใช้ได้:\n" +
+        "📦 <b>สต๊อก</b> — ดูสต๊อกทั้งหมด\n" +
+        "⚠️ <b>สต๊อกต่ำ</b> — ดูเฉพาะที่ต่ำหรือหมด\n" +
+        "❓ <b>help</b> — แสดงคำสั่ง\n\n" +
+        "ระบบจะแจ้งเตือนอัตโนมัติเมื่อตัดสต๊อก"
+      );
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
+}
