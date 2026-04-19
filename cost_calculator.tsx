@@ -121,7 +121,6 @@ const initRaw=[
   {id:1100,name:"ไม้เสียบผลไม้",unit:"ชิ้น",pricePerPack:45,packSize:100,cat:"บรรจุภัณฑ์"},
   {id:1101,name:"ไวท์พีท monin",unit:"ml",pricePerPack:365,packSize:700,cat:"ไซรัป"},
 ];
-// รายการวัตถุดิบ SHIFT — สำหรับสาขา 3
 const shiftRaw=[
   {id:2001,name:"เมล็ดกาแฟคั่วกลาง SHIFT",unit:"g",pricePerPack:650,packSize:1000,cat:"ชา/กาแฟ"},
   {id:2002,name:"เมล็ดกาแฟคั่วเข้ม SHIFT",unit:"g",pricePerPack:650,packSize:1000,cat:"ชา/กาแฟ"},
@@ -326,8 +325,6 @@ const deepCloneFixed=()=>initFixed.map(f=>({...f}));
 
 const initBranches=[
   {id:1,name:"สาขา 1",color:"#7F77DD",pin:null,rms:deepCloneRms(),comps:deepCloneComps(),menus:deepCloneMenus(),fixed:deepCloneFixed(),sales:null},
-  {id:2,name:"สาขา 2",color:"#1D9E75",pin:null,rms:deepCloneRms(),comps:deepCloneComps(),menus:deepCloneMenus(),fixed:deepCloneFixed(),sales:null},
-  {id:3,name:"สาขา 3",color:"#D85A30",pin:null,rms:deepCloneRms(),comps:deepCloneComps(),menus:deepCloneMenus(),fixed:deepCloneFixed(),sales:null},
 ];
 
 const today=new Date();
@@ -390,7 +387,13 @@ function MBar({v,max=1,color,h=6}){
   </div>);
 }
 
+const APP_PASSWORD="Admin1112";
+
 export default function App(){
+  const [authed,setAuthed]=useState(()=>{try{return sessionStorage.getItem("cafe_authed")==="1";}catch(e){return false;}});
+  const [pwInput,setPwInput]=useState("");
+  const [pwError,setPwError]=useState(false);
+  const [showPw,setShowPw]=useState(false);
   const [tab,setTab]=useState(0);
   const [branches,setBranches]=useState(()=>{
     try{
@@ -399,7 +402,7 @@ export default function App(){
         const parsed=JSON.parse(saved);
         if(parsed&&parsed.length>0){
           // migrate: add PDF items per branch
-          const migrated=parsed.map((b:any,idx:number)=>{
+          const migrated=parsed.slice(0,1).map((b:any,idx:number)=>{
             let rmsToAdd:any[]=[];
             let menusToAdd:any[]=[];
             let fixedToAdd:any[]=[];
@@ -408,13 +411,6 @@ export default function App(){
               rmsToAdd=initRaw.filter(r=>r.id>=1001&&!existingRmIds.has(r.id));
               const existingMenuIds=new Set((b.menus||[]).map((m:any)=>m.id));
               menusToAdd=branch1Menus.filter(m=>!existingMenuIds.has(m.id));
-            } else if(idx===2){
-              const existingRmIds=new Set((b.rms||[]).map((r:any)=>r.id));
-              rmsToAdd=shiftRaw.filter(r=>!existingRmIds.has(r.id));
-              const existingMenuIds=new Set((b.menus||[]).map((m:any)=>m.id));
-              menusToAdd=shiftMenus.filter(m=>!existingMenuIds.has(m.id));
-              const existingFixedIds=new Set((b.fixed||[]).map((f:any)=>f.id));
-              fixedToAdd=shiftFixed.filter(f=>!existingFixedIds.has(f.id));
             }
             let next={...b};
             if(rmsToAdd.length>0){
@@ -437,13 +433,7 @@ export default function App(){
     }catch(e){}
     return initBranches.map(b=>({...b,sales:genSampleSales()}));
   });
-  const [activeBranchId,setActiveBranchId]=useState(1);
-  const [editBranchId,setEditBranchId]=useState(null);
-  const [editBranchName,setEditBranchName]=useState("");
-  const [editBranchPin,setEditBranchPin]=useState("");
-  const [pinModal,setPinModal]=useState(null);
-  const [pinInput,setPinInput]=useState("");
-  const [pinError,setPinError]=useState(false);
+  const activeBranchId=1;
 
   const currentBranch=branches.find(b=>b.id===activeBranchId)||branches[0];
   const rms=currentBranch.rms;
@@ -534,11 +524,6 @@ export default function App(){
   const chartInst=useRef(null);
   const syncTimerRef=useRef(null);
 
-  // ล็อกตอน startup ถ้าสาขา active มี PIN
-  useEffect(()=>{
-    const b=branches.find(x=>x.id===activeBranchId);
-    if(b&&b.pin){setPinModal(b.id);}
-  },[]);
 
   useEffect(()=>{
     try{localStorage.setItem("cafe_branches",JSON.stringify(branches));}catch(e){}
@@ -677,6 +662,38 @@ export default function App(){
     return `${thTHMonth[m-1]} ${y+543}`;
   };
 
+  const handleLogin=()=>{
+    if(pwInput===APP_PASSWORD){sessionStorage.setItem("cafe_authed","1");setAuthed(true);}
+    else{setPwError(true);setPwInput("");}
+  };
+
+  if(!authed) return(
+    <div style={{fontFamily:"var(--font-sans)",background:"#f8f7ff",minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center"}}>
+      <div style={{background:"#fff",borderRadius:24,padding:"40px 44px",width:340,boxShadow:"0 20px 60px rgba(127,119,221,.15)",textAlign:"center"}}>
+        <div style={{fontSize:48,marginBottom:8}}>☕</div>
+        <div style={{fontWeight:700,fontSize:20,color:"#1e1b4b",marginBottom:4}}>Simple Cafe</div>
+        <div style={{fontSize:13,color:"#64748b",marginBottom:28}}>ใส่รหัสผ่านเพื่อเข้าใช้งาน</div>
+        <div style={{position:"relative"}}>
+          <input autoFocus type={showPw?"text":"password"} placeholder="รหัสผ่าน"
+            style={{width:"100%",padding:"12px 44px 12px 16px",borderRadius:12,border:`2px solid ${pwError?"#ef4444":"#e2e8f0"}`,fontSize:15,boxSizing:"border-box",outline:"none",letterSpacing:showPw?1:2}}
+            value={pwInput}
+            onChange={e=>{setPwInput(e.target.value);setPwError(false);}}
+            onKeyDown={e=>{if(e.key==="Enter")handleLogin();}}
+          />
+          <button
+            type="button"
+            onClick={()=>setShowPw(v=>!v)}
+            style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",fontSize:18,color:"#94a3b8",padding:0,lineHeight:1}}
+          >{showPw?"🙈":"👁️"}</button>
+        </div>
+        {pwError&&<div style={{color:"#ef4444",fontSize:12,marginTop:8}}>รหัสผ่านไม่ถูกต้อง</div>}
+        <button style={{marginTop:16,width:"100%",padding:"12px",borderRadius:12,border:"none",background:"#7F77DD",color:"#fff",fontSize:15,fontWeight:600,cursor:"pointer"}} onClick={handleLogin}>
+          เข้าใช้งาน
+        </button>
+      </div>
+    </div>
+  );
+
   return(
     <div style={{fontFamily:"var(--font-sans)",background:"#f8f7ff",minHeight:"100vh",padding:"0 0 3rem"}}>
       <div className="app-header" style={{background:tc.color,padding:"18px 24px 0",transition:"background .3s"}}>
@@ -707,26 +724,6 @@ export default function App(){
               <a href="https://script.google.com" target="_blank" rel="noreferrer" style={{padding:"8px 16px",borderRadius:9,background:"rgba(255,255,255,.15)",border:"1.5px solid rgba(255,255,255,.3)",color:"#fff",cursor:"pointer",fontSize:12,textDecoration:"none"}}>เปิด Apps Script ↗</a>
             </div>
           )}
-          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:12,flexWrap:"wrap"}}>
-            <span style={{fontSize:11,color:"rgba(255,255,255,.6)",marginRight:4}}>เลือกสาขา:</span>
-            {branches.map(b=>(
-              <div key={b.id}>
-                {editBranchId===b.id?(
-                  <div style={{display:"flex",gap:4,alignItems:"center",background:"rgba(0,0,0,.25)",padding:"5px 10px",borderRadius:10}}>
-                    <input placeholder="ชื่อสาขา" style={{padding:"4px 8px",borderRadius:7,border:"none",fontSize:12,width:80}} value={editBranchName} onChange={e=>setEditBranchName(e.target.value)}/>
-                    <input placeholder="PIN 4 หลัก" maxLength={4} style={{padding:"4px 8px",borderRadius:7,border:"none",fontSize:12,width:80}} value={editBranchPin} onChange={e=>setEditBranchPin(e.target.value.replace(/\D/g,""))}/>
-                    <button style={{padding:"4px 8px",borderRadius:7,background:"#fff",border:"none",fontSize:11,cursor:"pointer",color:"#1D9E75",fontWeight:600}} onClick={()=>{setBranches(prev=>prev.map(x=>x.id===b.id?{...x,name:editBranchName,pin:editBranchPin||null}:x));setEditBranchId(null);}}>✓</button>
-                    <button style={{padding:"4px 8px",borderRadius:7,background:"rgba(255,255,255,.2)",border:"none",fontSize:11,cursor:"pointer",color:"#fff"}} onClick={()=>setEditBranchId(null)}>✕</button>
-                  </div>
-                ):(
-                  <button onClick={()=>{if(b.id===activeBranchId){setEditBranchId(b.id);setEditBranchName(b.name);setEditBranchPin(b.pin||"");}else if(b.pin){setPinModal(b.id);setPinInput("");setPinError(false);}else{setActiveBranchId(b.id);}}} style={{display:"flex",alignItems:"center",gap:5,padding:"6px 14px",borderRadius:20,border:`2px solid ${activeBranchId===b.id?"#fff":"rgba(255,255,255,.35)"}`,background:activeBranchId===b.id?"rgba(255,255,255,.95)":"rgba(255,255,255,.12)",color:activeBranchId===b.id?tc.color:"#fff",cursor:"pointer",fontSize:12,fontWeight:activeBranchId===b.id?600:400,transition:"all .15s"}}>
-                    {b.pin?"🔒":"🏪"} {b.name}{activeBranchId===b.id&&<span style={{fontSize:10,opacity:.6}}> ✏️</span>}
-                  </button>
-                )}
-              </div>
-            ))}
-            <button onClick={()=>{const id=Date.now();setBranches(prev=>[...prev,{id,name:`สาขา ${prev.length+1}`,pin:null,rms:deepCloneRms(),comps:deepCloneComps(),menus:deepCloneMenus(),fixed:deepCloneFixed(),sales:genSampleSales(),stock:{},stockMin:{},stockDeducted:{}}]);setActiveBranchId(id);}} style={{padding:"6px 12px",borderRadius:20,border:"2px dashed rgba(255,255,255,.5)",background:"transparent",color:"rgba(255,255,255,.85)",cursor:"pointer",fontSize:12}}>+ สาขา</button>
-          </div>
           <div style={{display:"flex",gap:2,overflowX:"auto"}}>
             {TABS.map(t=>(
               <button key={t.id} onClick={()=>setTab(t.id)} style={{display:"flex",alignItems:"center",gap:6,padding:"10px 14px",border:"none",background:tab===t.id?"#fff":"transparent",color:tab===t.id?tc.color:"rgba(255,255,255,.8)",cursor:"pointer",fontSize:13,fontWeight:tab===t.id?500:400,borderRadius:"8px 8px 0 0",transition:"all .15s",whiteSpace:"nowrap"}}>
@@ -1542,24 +1539,6 @@ export default function App(){
       </div>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" key="cjs"></script>
 
-      {pinModal&&(
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.55)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000}} onClick={()=>{if(pinModal!==activeBranchId){setPinModal(null);setPinInput("");setPinError(false);}}}>
-          <div style={{background:"#fff",borderRadius:20,padding:"32px 36px",width:300,textAlign:"center",boxShadow:"0 20px 60px rgba(0,0,0,.3)"}} onClick={e=>e.stopPropagation()}>
-            <div style={{fontSize:36,marginBottom:8}}>🔒</div>
-            <div style={{fontWeight:600,fontSize:16,color:"#1e293b",marginBottom:4}}>{branches.find(b=>b.id===pinModal)?.name}</div>
-            <div style={{fontSize:12,color:"#64748b",marginBottom:20}}>ใส่รหัส PIN เพื่อเข้าใช้งาน</div>
-            <input autoFocus type="password" inputMode="numeric" maxLength={4} placeholder="● ● ● ●"
-              style={{width:"100%",padding:"12px",borderRadius:10,border:`2px solid ${pinError?"#ef4444":"#e2e8f0"}`,fontSize:22,textAlign:"center",letterSpacing:8,boxSizing:"border-box",outline:"none"}}
-              value={pinInput} onChange={e=>{setPinInput(e.target.value.replace(/\D/g,""));setPinError(false);}}
-              onKeyDown={e=>{if(e.key==="Enter"){const b=branches.find(x=>x.id===pinModal);if(b&&b.pin===pinInput){setActiveBranchId(pinModal);setPinModal(null);setPinInput("");}else{setPinError(true);setPinInput("");}}}}/>
-            {pinError&&<div style={{color:"#ef4444",fontSize:12,marginTop:8}}>รหัสไม่ถูกต้อง ลองใหม่</div>}
-            <div style={{display:"flex",gap:8,marginTop:16}}>
-              {pinModal!==activeBranchId&&<button style={{flex:1,padding:"10px",borderRadius:10,border:"1.5px solid #e2e8f0",background:"#f8fafc",cursor:"pointer",fontSize:13,color:"#64748b"}} onClick={()=>{setPinModal(null);setPinInput("");setPinError(false);}}>ยกเลิก</button>}
-              <button style={{flex:1,padding:"10px",borderRadius:10,border:"none",background:"#7F77DD",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:500}} onClick={()=>{const b=branches.find(x=>x.id===pinModal);if(b&&b.pin===pinInput){setActiveBranchId(pinModal);setPinModal(null);setPinInput("");}else{setPinError(true);setPinInput("");;}}}>เข้าใช้งาน</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
