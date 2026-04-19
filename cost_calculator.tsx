@@ -481,7 +481,7 @@ export default function App(){
     const tok=localStorage.getItem("cafe_tg_token")||"";
     const cid=localStorage.getItem("cafe_tg_chatid")||"";
     if(!tok||!cid)return;
-    try{await fetch(`https://api.telegram.org/bot${tok}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:cid,text:message,parse_mode:"HTML"})});}catch(e){}
+    try{await fetch("/api/telegram",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token:tok,chatId:cid,message})});}catch(e){}
   };
 
   const deductStockForDate=(dateKey)=>{
@@ -767,9 +767,9 @@ export default function App(){
                 if(!tgToken||!tgChatId){setTgMsg("❌ กรุณาใส่ Token และ Chat ID");setTimeout(()=>setTgMsg(""),4000);return;}
                 setTgMsg("⏳ กำลังทดสอบ...");
                 try{
-                  const r=await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:tgChatId,text:"✅ เชื่อมต่อ Telegram สำเร็จ!\nระบบแจ้งเตือนสต๊อกพร้อมใช้งานแล้ว",parse_mode:"HTML"})});
+                  const r=await fetch("/api/telegram",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token:tgToken,chatId:tgChatId,message:"✅ เชื่อมต่อ Telegram สำเร็จ!\nระบบแจ้งเตือนสต๊อกพร้อมใช้งานแล้ว"})});
                   const d=await r.json();
-                  setTgMsg(d.ok?"✅ ส่งสำเร็จ":`❌ ${d.description||"ส่งไม่ได้"}`);
+                  setTgMsg(d.success?"✅ ส่งสำเร็จ":`❌ ${d.error||"ส่งไม่ได้"}`);
                 }catch(e:any){setTgMsg(`❌ Network error: ${e.message}`);}
                 setTimeout(()=>setTgMsg(""),4000);
               }}>📤 ทดสอบส่ง</button>
