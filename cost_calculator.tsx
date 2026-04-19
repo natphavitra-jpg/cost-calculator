@@ -477,14 +477,47 @@ export default function App(){
     return usage;
   };
 
+  const sendTelegram=async(message:string)=>{
+    const tok=localStorage.getItem("cafe_tg_token")||"";
+    const cid=localStorage.getItem("cafe_tg_chatid")||"";
+    if(!tok||!cid)return;
+    try{await fetch("/api/telegram",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token:tok,chatId:cid,message})});}catch(e){}
+  };
+
   const deductStockForDate=(dateKey)=>{
     if(stockDeducted[dateKey])return;
     const usage=calcDailyUsage(dateKey);
     setStock((prev:any)=>{
       const next={...prev};
-      Object.entries(usage).forEach(([id,amt])=>{
-        next[id]=(next[id]||0)-amt;
-      });
+      Object.entries(usage).forEach(([id,amt])=>{next[id]=(next[id]||0)-amt;});
+
+      // สร้างข้อความแจ้งเตือน Telegram
+      const d=dateKey.split("-");
+      const dateStr=`${d[2]}/${d[1]}/${(+d[0]+543).toString().slice(-2)}`;
+      const lines:string[]=[];
+      lines.push(`✂️ <b>ตัดสต๊อกแล้ว</b> — ${dateStr}\n`);
+
+      const deducted=Object.entries(usage).filter(([,a])=>(a as number)>0);
+      if(deducted.length){
+        lines.push("📦 <b>รายการที่ตัด:</b>");
+        deducted.forEach(([id,amt])=>{
+          const r=rms.find((x:any)=>x.id===+id);
+          if(r){const remain=Math.max(0,(next[+id]||0));lines.push(`  • ${r.name}: -${amt}${r.unit} (คงเหลือ ${remain}${r.unit})`);}
+        });
+      }
+
+      const low=rms.filter((r:any)=>stockMin[r.id]&&(next[r.id]||0)<stockMin[r.id]);
+      if(low.length){
+        lines.push(`\n⚠️ <b>สต๊อกต่ำกว่าขั้นต่ำ (${low.length} รายการ):</b>`);
+        low.forEach((r:any)=>{lines.push(`  • ${r.name}: ${next[r.id]||0}${r.unit} / ขั้นต่ำ ${stockMin[r.id]}${r.unit}`);});
+      }
+      const out=rms.filter((r:any)=>stockMin[r.id]&&(next[r.id]||0)<=0);
+      if(out.length){
+        lines.push(`\n🚨 <b>หมดสต๊อก (${out.length} รายการ):</b>`);
+        out.forEach((r:any)=>{lines.push(`  • ${r.name}`);});
+      }
+
+      sendTelegram(lines.join("\n"));
       return next;
     });
     setStockDeducted((prev:any)=>({...prev,[dateKey]:true}));
@@ -520,6 +553,10 @@ export default function App(){
   const [gsUrl,setGsUrl]=useState(()=>{try{return localStorage.getItem("cafe_gs_url")||"";}catch(e){return "";}});
   const [gsSyncMsg,setGsSyncMsg]=useState("");
   const [showGsSettings,setShowGsSettings]=useState(false);
+  const [tgToken,setTgToken]=useState(()=>{try{return localStorage.getItem("cafe_tg_token")||"";}catch(e){return "";}});
+  const [tgChatId,setTgChatId]=useState(()=>{try{return localStorage.getItem("cafe_tg_chatid")||"";}catch(e){return "";}});
+  const [showTgSettings,setShowTgSettings]=useState(false);
+  const [tgMsg,setTgMsg]=useState("");
   const chartRef=useRef(null);
   const chartInst=useRef(null);
   const syncTimerRef=useRef(null);
@@ -708,11 +745,37 @@ export default function App(){
             </div>
             <div style={{display:"flex",alignItems:"center",gap:8}}>
               {gsSyncMsg&&<span className="gs-sync-msg" style={{fontSize:11,color:"rgba(255,255,255,.85)",background:"rgba(0,0,0,.2)",padding:"3px 10px",borderRadius:20}}>{gsSyncMsg}</span>}
-              <button onClick={()=>setShowGsSettings(!showGsSettings)} style={{padding:"6px 14px",borderRadius:20,border:"2px solid rgba(255,255,255,.4)",background:"rgba(255,255,255,.15)",color:"#fff",cursor:"pointer",fontSize:12}}>
+              {tgMsg&&<span style={{fontSize:11,color:"rgba(255,255,255,.85)",background:"rgba(0,0,0,.2)",padding:"3px 10px",borderRadius:20}}>{tgMsg}</span>}
+              <button onClick={()=>{setShowTgSettings(!showTgSettings);setShowGsSettings(false);}} style={{padding:"6px 14px",borderRadius:20,border:`2px solid ${tgToken&&tgChatId?"rgba(255,255,255,.7)":"rgba(255,255,255,.4)"}`,background:tgToken&&tgChatId?"rgba(255,255,255,.25)":"rgba(255,255,255,.15)",color:"#fff",cursor:"pointer",fontSize:12}}>
+                📱<span className="gs-btn-text"> Telegram</span>
+              </button>
+              <button onClick={()=>{setShowGsSettings(!showGsSettings);setShowTgSettings(false);}} style={{padding:"6px 14px",borderRadius:20,border:"2px solid rgba(255,255,255,.4)",background:"rgba(255,255,255,.15)",color:"#fff",cursor:"pointer",fontSize:12}}>
                 ⚙️<span className="gs-btn-text"> Google Sheets</span>
               </button>
             </div>
           </div>
+          {showTgSettings&&(
+            <div style={{background:"rgba(0,0,0,.25)",borderRadius:12,padding:"14px 16px",marginBottom:12,display:"flex",gap:10,alignItems:"flex-end",flexWrap:"wrap"}}>
+              <div style={{flex:1,minWidth:200}}>
+                <div style={{fontSize:11,color:"rgba(255,255,255,.7)",marginBottom:4}}>Bot Token</div>
+                <input style={{...inp,background:"rgba(255,255,255,.9)",fontSize:12}} placeholder="1234567890:AAH..." value={tgToken} onChange={e=>{setTgToken(e.target.value);try{localStorage.setItem("cafe_tg_token",e.target.value);}catch(ex){}}}/>
+              </div>
+              <div style={{flex:1,minWidth:140}}>
+                <div style={{fontSize:11,color:"rgba(255,255,255,.7)",marginBottom:4}}>Chat ID</div>
+                <input style={{...inp,background:"rgba(255,255,255,.9)",fontSize:12}} placeholder="8668867696" value={tgChatId} onChange={e=>{setTgChatId(e.target.value);try{localStorage.setItem("cafe_tg_chatid",e.target.value);}catch(ex){}}}/>
+              </div>
+              <button style={{padding:"8px 16px",borderRadius:9,background:"#fff",border:"none",color:"#534AB7",cursor:"pointer",fontSize:12,fontWeight:500}} onClick={()=>setShowTgSettings(false)}>บันทึก ✓</button>
+              <button style={{padding:"8px 16px",borderRadius:9,background:"#1D9E75",border:"none",color:"#fff",cursor:"pointer",fontSize:12,fontWeight:500}} onClick={async()=>{
+                setTgMsg("⏳ กำลังทดสอบ...");
+                try{
+                  const r=await fetch("/api/telegram",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token:tgToken,chatId:tgChatId,message:"✅ เชื่อมต่อ Telegram สำเร็จ!\nระบบแจ้งเตือนสต๊อกพร้อมใช้งานแล้ว"})});
+                  const d=await r.json();
+                  setTgMsg(d.success?"✅ ส่งสำเร็จ":`❌ ${d.error||"ส่งไม่ได้"}`);
+                }catch(e:any){setTgMsg(`❌ ${e.message}`);}
+                setTimeout(()=>setTgMsg(""),4000);
+              }}>📤 ทดสอบส่ง</button>
+            </div>
+          )}
           {showGsSettings&&(
             <div style={{background:"rgba(0,0,0,.25)",borderRadius:12,padding:"14px 16px",marginBottom:12,display:"flex",gap:10,alignItems:"flex-end",flexWrap:"wrap"}}>
               <div style={{flex:1,minWidth:260}}>
