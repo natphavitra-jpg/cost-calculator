@@ -75,6 +75,9 @@ export async function POST(req: NextRequest) {
         await sendTg(token, chatId, lines.join("\n"));
       }
 
+    } else if (text === "/getchatid") {
+      await sendTg(token, chatId, `🆔 Chat ID ของกลุ่มนี้:\n<code>${chatId}</code>`);
+
     } else if (text === "help" || text === "ช่วยเหลือ" || text === "/start") {
       await sendTg(token, chatId,
         "☕ <b>Simple Cafe Alert Bot</b>\n\nคำสั่งที่ใช้ได้:\n" +
