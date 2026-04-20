@@ -532,7 +532,15 @@ export default function App(){
   const [wdQty,setWdQty]=useState<number>(0);
   const [wdNote,setWdNote]=useState("");
   const [wdMsg,setWdMsg]=useState("");
+  const [wdSearch,setWdSearch]=useState("");
   const [wdHistory,setWdHistory]=useState<any[]>(()=>{try{return JSON.parse(localStorage.getItem("cafe_wd_history")||"[]");}catch(e){return [];}});
+
+  const [rcItem,setRcItem]=useState("");
+  const [rcQty,setRcQty]=useState<number>(0);
+  const [rcNote,setRcNote]=useState("");
+  const [rcMsg,setRcMsg]=useState("");
+  const [rcSearch,setRcSearch]=useState("");
+  const [lastRedisSync,setLastRedisSync]=useState("");
 
   const submitWithdrawal=()=>{
     if(!wdName.trim()){setWdMsg("❌ กรุณาระบุชื่อพนักงาน");setTimeout(()=>setWdMsg(""),3000);return;}
@@ -569,7 +577,27 @@ export default function App(){
     setWdMsg(`✅ เบิก ${r.name} ${wdQty.toFixed(1)}${r.unit} เรียบร้อย`);
     setWdQty(0);
     setWdNote("");
+    setWdSearch("");
     setTimeout(()=>setWdMsg(""),4000);
+  };
+
+  const submitReceive=()=>{
+    if(!rcItem){setRcMsg("❌ กรุณาเลือกวัตถุดิบ");setTimeout(()=>setRcMsg(""),3000);return;}
+    if(!rcQty||rcQty<=0){setRcMsg("❌ กรุณาระบุจำนวนที่ถูกต้อง");setTimeout(()=>setRcMsg(""),3000);return;}
+    const r=rms.find((x:any)=>x.id===+rcItem);
+    if(!r)return;
+    const nextStock={...stock,[r.id]:(stock[r.id]||0)+rcQty};
+    setStock(nextStock);
+    const now=new Date();
+    const updatedAt=`${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()+543} ${now.toLocaleTimeString("th-TH")}`;
+    fetch("/api/stock-sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({stock:nextStock,stockMin,rms,updatedAt})}).catch(()=>{});
+    const msg=`📥 <b>รับของเข้าสต๊อก</b>\n📦 ${r.name} +${rcQty.toFixed(1)}${r.unit}\n📊 คงเหลือ: ${(nextStock[r.id]||0).toFixed(1)}${r.unit}${rcNote.trim()?`\n📝 ${rcNote.trim()}`:""}`;
+    sendTelegram(msg);
+    setRcMsg(`✅ รับ ${r.name} +${rcQty.toFixed(1)}${r.unit} เรียบร้อย`);
+    setRcQty(0);
+    setRcNote("");
+    setRcSearch("");
+    setTimeout(()=>setRcMsg(""),4000);
   };
 
   const [selectedDate,setSelectedDate]=useState(todayKey);
@@ -644,6 +672,21 @@ export default function App(){
     if(syncTimerRef.current)clearTimeout(syncTimerRef.current);
     syncTimerRef.current=setTimeout(doSync,10000);
   },[branches,gsUrl]);
+
+  useEffect(()=>{
+    const fetchRedisStock=async()=>{
+      if(editStockId)return;
+      try{
+        const res=await fetch("/api/stock-sync");
+        if(!res.ok)return;
+        const data=await res.json();
+        if(data.stock){setStock(data.stock);if(data.stockMin)setStockMin(data.stockMin);if(data.updatedAt)setLastRedisSync(data.updatedAt);}
+      }catch(e){}
+    };
+    fetchRedisStock();
+    const iv=setInterval(fetchRedisStock,60000);
+    return()=>clearInterval(iv);
+  },[]);
 
   const syncStockToRedis=async(showAlert=false)=>{
     const now=new Date();
@@ -1578,7 +1621,33 @@ export default function App(){
                 {lowCount>0&&<div style={{background:"#FEF3C7",color:"#92400e",padding:"6px 14px",borderRadius:20,fontSize:12,fontWeight:500}}>⚠️ ใกล้หมด {lowCount} รายการ</div>}
                 {outCount>0&&<div style={{background:"#FEE2E2",color:"#991b1b",padding:"6px 14px",borderRadius:20,fontSize:12,fontWeight:500}}>🔴 หมดแล้ว {outCount} รายการ</div>}
                 <button style={{padding:"6px 14px",borderRadius:20,background:"#E1F5EE",border:"1.5px solid #9FE1CB",color:"#0F6E56",fontSize:12,cursor:"pointer",fontWeight:500}} onClick={()=>{syncStockToRedis(true);}}>📤 Sync สต๊อก → Bot</button>
+                {lastRedisSync&&<div style={{fontSize:11,color:"#94a3b8"}}>🔄 {lastRedisSync}</div>}
               </div>
+            </div>
+
+            {/* รับของเข้าสต๊อก */}
+            <div style={{background:"#fff",borderRadius:14,padding:"18px 20px",border:"1.5px solid #BFDBFE",marginBottom:16}}>
+              <div style={{fontWeight:500,fontSize:14,color:"#1D4ED8",marginBottom:12}}>📥 รับของเข้าสต๊อก</div>
+              <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"flex-end"}}>
+                <div style={{flex:2,minWidth:220}}>
+                  <label style={{fontSize:11,color:"#64748b",display:"block",marginBottom:4}}>ค้นหาวัตถุดิบ</label>
+                  <input style={{...inp,marginBottom:4}} placeholder="พิมพ์ชื่อเพื่อค้นหา..." value={rcSearch} onChange={e=>{setRcSearch(e.target.value);setRcItem("");}}/>
+                  <select style={inp as any} value={rcItem} onChange={e=>setRcItem(e.target.value)}>
+                    <option value="">-- เลือกวัตถุดิบ --</option>
+                    {rms.filter((r:any)=>!rcSearch||r.name.toLowerCase().includes(rcSearch.toLowerCase())||r.cat.includes(rcSearch)).map((r:any)=><option key={r.id} value={r.id}>{r.name} (มี {(stock[r.id]||0).toFixed(1)}{r.unit})</option>)}
+                  </select>
+                </div>
+                <div style={{flex:1,minWidth:100}}>
+                  <label style={{fontSize:11,color:"#64748b",display:"block",marginBottom:4}}>จำนวนที่รับ</label>
+                  <input type="number" style={inp} min={0} step={0.1} placeholder="0" value={rcQty||""} onChange={e=>setRcQty(Number(e.target.value))}/>
+                </div>
+                <div style={{flex:1,minWidth:120}}>
+                  <label style={{fontSize:11,color:"#64748b",display:"block",marginBottom:4}}>หมายเหตุ</label>
+                  <input style={inp} placeholder="(ไม่บังคับ)" value={rcNote} onChange={e=>setRcNote(e.target.value)}/>
+                </div>
+                <button style={{padding:"9px 20px",borderRadius:9,background:"#1D4ED8",border:"none",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:600,whiteSpace:"nowrap"}} onClick={submitReceive}>📥 ยืนยันรับของ</button>
+              </div>
+              {rcMsg&&<div style={{marginTop:8,fontSize:13,color:rcMsg.startsWith("✅")?"#0F6E56":"#DC2626",fontWeight:500}}>{rcMsg}</div>}
             </div>
 
             {/* ตัดสต๊อกจากยอดขาย */}
@@ -1680,9 +1749,10 @@ export default function App(){
             </div>
             <div style={{marginBottom:12}}>
               <label style={{fontSize:12,color:"#64748b",display:"block",marginBottom:4}}>วัตถุดิบ *</label>
+              <input style={{...inp,marginBottom:6}} placeholder="🔍 ค้นหาวัตถุดิบ..." value={wdSearch} onChange={e=>{setWdSearch(e.target.value);setWdItem("");}}/>
               <select style={inp as any} value={wdItem} onChange={e=>setWdItem(e.target.value)}>
                 <option value="">-- เลือกวัตถุดิบ --</option>
-                {rms.map((r:any)=><option key={r.id} value={r.id}>{r.name} (คงเหลือ {(stock[r.id]||0).toFixed(1)}{r.unit})</option>)}
+                {rms.filter((r:any)=>!wdSearch||r.name.toLowerCase().includes(wdSearch.toLowerCase())||r.cat.includes(wdSearch)).map((r:any)=><option key={r.id} value={r.id}>{r.name} (คงเหลือ {(stock[r.id]||0).toFixed(1)}{r.unit})</option>)}
               </select>
             </div>
             <div style={{marginBottom:12,display:"flex",gap:12,alignItems:"flex-end"}}>
