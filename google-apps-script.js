@@ -20,28 +20,31 @@ function doPost(e) {
       const menuSheetName = branch.name + " - เมนู";
       let menuSheet = ss.getSheetByName(menuSheetName) || ss.insertSheet(menuSheetName);
       menuSheet.clearContents();
-      menuSheet.appendRow(["เมนู", "ประเภท", "ราคาขาย (฿)", "ต้นทุน (฿)", "Gross Margin (%)", "อัปเดตล่าสุด"]);
+      const menuRows = [["เมนู", "ประเภท", "ราคาขาย (฿)", "ต้นทุน (฿)", "Gross Margin (%)", "อัปเดตล่าสุด"]];
       branch.menus.forEach(m => {
-        menuSheet.appendRow([m.name, m.cat, m.price, Number(m.cost || 0).toFixed(2), Number(m.gm || 0).toFixed(1), now]);
+        menuRows.push([m.name, m.cat, m.price, Number(m.cost || 0).toFixed(2), Number(m.gm || 0).toFixed(1), now]);
       });
+      menuSheet.getRange(1, 1, menuRows.length, menuRows[0].length).setValues(menuRows);
 
       // --- Sheet: วัตถุดิบ ---
       const rmSheetName = branch.name + " - วัตถุดิบ";
       let rmSheet = ss.getSheetByName(rmSheetName) || ss.insertSheet(rmSheetName);
       rmSheet.clearContents();
-      rmSheet.appendRow(["วัตถุดิบ", "หมวด", "ราคาต่อแพ็ค (฿)", "ปริมาณ", "หน่วย", "ราคาต่อหน่วย (฿)", "อัปเดตล่าสุด"]);
+      const rmRows = [["วัตถุดิบ", "หมวด", "ราคาต่อแพ็ค (฿)", "ปริมาณ", "หน่วย", "ราคาต่อหน่วย (฿)", "อัปเดตล่าสุด"]];
       branch.rms.forEach(r => {
-        rmSheet.appendRow([r.name, r.cat, r.pricePerPack, r.packSize, r.unit, (r.pricePerPack / r.packSize).toFixed(4), now]);
+        rmRows.push([r.name, r.cat, r.pricePerPack, r.packSize, r.unit, (r.pricePerPack / r.packSize).toFixed(4), now]);
       });
+      rmSheet.getRange(1, 1, rmRows.length, rmRows[0].length).setValues(rmRows);
 
       // --- Sheet: Fixed Cost ---
       const fcSheetName = branch.name + " - Fixed Cost";
       let fcSheet = ss.getSheetByName(fcSheetName) || ss.insertSheet(fcSheetName);
       fcSheet.clearContents();
-      fcSheet.appendRow(["รายการ", "จำนวน (฿)", "ช่วงเวลา", "อัปเดตล่าสุด"]);
+      const fcRows = [["รายการ", "จำนวน (฿)", "ช่วงเวลา", "อัปเดตล่าสุด"]];
       branch.fixed.forEach(f => {
-        fcSheet.appendRow([f.name, f.amt, f.period, now]);
+        fcRows.push([f.name, f.amt, f.period, now]);
       });
+      fcSheet.getRange(1, 1, fcRows.length, fcRows[0].length).setValues(fcRows);
     });
 
     return ContentService

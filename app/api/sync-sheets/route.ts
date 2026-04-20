@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
     if (!gsUrl) return NextResponse.json({ error: "no url" }, { status: 400 });
 
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 15000);
+    const timer = setTimeout(() => controller.abort(), 25000);
     try {
       const res = await fetch(gsUrl, {
         method: "POST",
