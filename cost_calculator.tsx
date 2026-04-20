@@ -598,10 +598,19 @@ export default function App(){
     syncTimerRef.current=setTimeout(doSync,10000);
   },[branches,gsUrl]);
 
-  const syncStockToRedis=()=>{
+  const syncStockToRedis=async(showAlert=false)=>{
     const now=new Date();
     const updatedAt=`${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()+543} ${now.toLocaleTimeString("th-TH")}`;
-    fetch("/api/stock-sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({stock,stockMin,rms,updatedAt})}).catch(()=>{});
+    try{
+      const res=await fetch("/api/stock-sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({stock,stockMin,rms,updatedAt})});
+      const data=await res.json();
+      if(showAlert){
+        if(data.success) alert("✅ Sync สต๊อกขึ้น Telegram Bot แล้ว");
+        else alert("❌ Sync ล้มเหลว: "+(data.error||"unknown error"));
+      }
+    }catch(e:any){
+      if(showAlert) alert("❌ Sync ล้มเหลว: "+e.message);
+    }
   };
 
   useEffect(()=>{syncStockToRedis();},[]);
@@ -1521,7 +1530,7 @@ export default function App(){
               <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center"}}>
                 {lowCount>0&&<div style={{background:"#FEF3C7",color:"#92400e",padding:"6px 14px",borderRadius:20,fontSize:12,fontWeight:500}}>⚠️ ใกล้หมด {lowCount} รายการ</div>}
                 {outCount>0&&<div style={{background:"#FEE2E2",color:"#991b1b",padding:"6px 14px",borderRadius:20,fontSize:12,fontWeight:500}}>🔴 หมดแล้ว {outCount} รายการ</div>}
-                <button style={{padding:"6px 14px",borderRadius:20,background:"#E1F5EE",border:"1.5px solid #9FE1CB",color:"#0F6E56",fontSize:12,cursor:"pointer",fontWeight:500}} onClick={()=>{syncStockToRedis();alert("✅ Sync สต๊อกขึ้น Telegram Bot แล้ว");}}>📤 Sync สต๊อก → Bot</button>
+                <button style={{padding:"6px 14px",borderRadius:20,background:"#E1F5EE",border:"1.5px solid #9FE1CB",color:"#0F6E56",fontSize:12,cursor:"pointer",fontWeight:500}} onClick={()=>{syncStockToRedis(true);}}>📤 Sync สต๊อก → Bot</button>
               </div>
             </div>
 
