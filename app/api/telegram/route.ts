@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: chatId, text: message }),
+      body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: "HTML" }),
     });
 
     const data = await res.json();
