@@ -353,6 +353,7 @@ const TABS=[
   {id:4,label:"ต้นทุน & Margin",emoji:"💰",color:"#7F77DD"},
   {id:5,label:"Fixed Cost",emoji:"📌",color:"#BA7517"},
   {id:6,label:"สต๊อก",emoji:"📦",color:"#0F6E56"},
+  {id:7,label:"เบิกของ",emoji:"📋",color:"#7C3AED"},
 ];
 
 const fmt=(n,d=0)=>Number(n).toLocaleString("th-TH",{minimumFractionDigits:d,maximumFractionDigits:d});
@@ -524,6 +525,50 @@ export default function App(){
       out.forEach((r:any)=>{lines.push(`  • ${r.name}`);});
     }
     sendTelegram(lines.join("\n"));
+  };
+
+  const [wdName,setWdName]=useState("");
+  const [wdItem,setWdItem]=useState("");
+  const [wdQty,setWdQty]=useState<number>(0);
+  const [wdNote,setWdNote]=useState("");
+  const [wdMsg,setWdMsg]=useState("");
+  const [wdHistory,setWdHistory]=useState<any[]>(()=>{try{return JSON.parse(localStorage.getItem("cafe_wd_history")||"[]");}catch(e){return [];}});
+
+  const submitWithdrawal=()=>{
+    if(!wdName.trim()){setWdMsg("❌ กรุณาระบุชื่อพนักงาน");setTimeout(()=>setWdMsg(""),3000);return;}
+    if(!wdItem){setWdMsg("❌ กรุณาเลือกวัตถุดิบ");setTimeout(()=>setWdMsg(""),3000);return;}
+    if(!wdQty||wdQty<=0){setWdMsg("❌ กรุณาระบุจำนวนที่ถูกต้อง");setTimeout(()=>setWdMsg(""),3000);return;}
+    const r=rms.find((x:any)=>x.id===+wdItem);
+    if(!r){setWdMsg("❌ ไม่พบวัตถุดิบ");return;}
+    const curStock=stock[r.id]||0;
+    if(wdQty>curStock){setWdMsg(`❌ สต๊อกไม่เพียงพอ (มี ${curStock.toFixed(1)}${r.unit})`);setTimeout(()=>setWdMsg(""),3000);return;}
+
+    const nextStock={...stock,[r.id]:(stock[r.id]||0)-wdQty};
+    setStock(nextStock);
+
+    const now=new Date();
+    const timeStr=now.toLocaleString("th-TH");
+    const entry={id:Date.now(),name:wdName.trim(),item:r.name,itemId:r.id,unit:r.unit,qty:wdQty,note:wdNote.trim(),time:timeStr};
+    const newHistory=[entry,...wdHistory].slice(0,100);
+    setWdHistory(newHistory);
+    try{localStorage.setItem("cafe_wd_history",JSON.stringify(newHistory));}catch(e){}
+
+    const updatedAt=`${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()+543} ${now.toLocaleTimeString("th-TH")}`;
+    fetch("/api/stock-sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({stock:nextStock,stockMin,rms,updatedAt})}).catch(()=>{});
+
+    const remain=nextStock[r.id]||0;
+    const isOut=remain<=0;
+    const isLow=stockMin[r.id]&&remain<stockMin[r.id]&&remain>0;
+    let msg=`📋 <b>เบิกของ</b>\n👤 พนักงาน: ${wdName.trim()}\n🕐 เวลา: ${timeStr}\n📦 รายการ: ${r.name} -${wdQty.toFixed(1)}${r.unit}\n📊 คงเหลือ: ${remain.toFixed(1)}${r.unit}`;
+    if(isOut) msg+=` 🚨 หมดแล้ว!`;
+    else if(isLow) msg+=` ⚠️ ต่ำกว่าขั้นต่ำ`;
+    if(wdNote.trim()) msg+=`\n📝 หมายเหตุ: ${wdNote.trim()}`;
+    sendTelegram(msg);
+
+    setWdMsg(`✅ เบิก ${r.name} ${wdQty.toFixed(1)}${r.unit} เรียบร้อย`);
+    setWdQty(0);
+    setWdNote("");
+    setTimeout(()=>setWdMsg(""),4000);
   };
 
   const [selectedDate,setSelectedDate]=useState(todayKey);
@@ -1622,6 +1667,70 @@ export default function App(){
           </div>
         );
       })()}
+
+      {tab===7&&(
+        <div style={{padding:"20px 16px",maxWidth:700,margin:"0 auto"}}>
+          <div style={{background:"#fff",borderRadius:14,padding:"20px",border:"1.5px solid #DDD6FE",marginBottom:20}}>
+            <div style={{fontWeight:600,fontSize:16,color:"#5B21B6",marginBottom:16}}>📋 แบบฟอร์มเบิกของ</div>
+            <div style={{marginBottom:12}}>
+              <label style={{fontSize:12,color:"#64748b",display:"block",marginBottom:4}}>ชื่อพนักงาน *</label>
+              <input style={inp} placeholder="ระบุชื่อพนักงาน" value={wdName} onChange={e=>setWdName(e.target.value)}/>
+            </div>
+            <div style={{marginBottom:12}}>
+              <label style={{fontSize:12,color:"#64748b",display:"block",marginBottom:4}}>วัตถุดิบ *</label>
+              <select style={inp as any} value={wdItem} onChange={e=>setWdItem(e.target.value)}>
+                <option value="">-- เลือกวัตถุดิบ --</option>
+                {rms.map((r:any)=><option key={r.id} value={r.id}>{r.name} (คงเหลือ {(stock[r.id]||0).toFixed(1)}{r.unit})</option>)}
+              </select>
+            </div>
+            <div style={{marginBottom:12,display:"flex",gap:12,alignItems:"flex-end"}}>
+              <div style={{flex:1}}>
+                <label style={{fontSize:12,color:"#64748b",display:"block",marginBottom:4}}>จำนวน *</label>
+                <input type="number" style={inp} min={0} step={0.1} placeholder="0" value={wdQty||""} onChange={e=>setWdQty(Number(e.target.value))}/>
+              </div>
+              {wdItem&&<div style={{padding:"8px 14px",background:"#F5F3FF",borderRadius:8,fontSize:13,color:"#5B21B6",fontWeight:500,whiteSpace:"nowrap"}}>
+                {rms.find((r:any)=>r.id===+wdItem)?.unit||""}
+              </div>}
+            </div>
+            <div style={{marginBottom:16}}>
+              <label style={{fontSize:12,color:"#64748b",display:"block",marginBottom:4}}>หมายเหตุ</label>
+              <input style={inp} placeholder="เหตุผลการเบิก (ไม่บังคับ)" value={wdNote} onChange={e=>setWdNote(e.target.value)}/>
+            </div>
+            <button style={{padding:"11px 24px",borderRadius:9,background:"#7C3AED",border:"none",color:"#fff",cursor:"pointer",fontSize:14,fontWeight:600,width:"100%"}} onClick={submitWithdrawal}>
+              ✅ ยืนยันเบิกของ
+            </button>
+            {wdMsg&&<div style={{marginTop:10,fontSize:13,color:wdMsg.startsWith("✅")?"#0F6E56":"#DC2626",textAlign:"center",fontWeight:500}}>{wdMsg}</div>}
+          </div>
+
+          <div style={{background:"#fff",borderRadius:14,border:"1.5px solid #e2e8f0",overflow:"hidden"}}>
+            <div style={{padding:"14px 20px",borderBottom:"1px solid #f1f5f9",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <span style={{fontWeight:600,fontSize:14,color:"#1e1b4b"}}>ประวัติการเบิกของ</span>
+              {wdHistory.length>0&&<button style={{fontSize:11,color:"#DC2626",background:"none",border:"none",cursor:"pointer"}} onClick={()=>{if(confirm("ลบประวัติทั้งหมด?")){setWdHistory([]);try{localStorage.removeItem("cafe_wd_history");}catch(e){}}}}>ลบทั้งหมด</button>}
+            </div>
+            {wdHistory.length===0
+              ?<div style={{padding:"24px",textAlign:"center",color:"#94a3b8",fontSize:13}}>ยังไม่มีประวัติการเบิก</div>
+              :<div style={{overflowX:"auto"}}>
+                <table style={{width:"100%",borderCollapse:"collapse",minWidth:500}}>
+                  <thead><tr style={{background:"#f8fafc"}}>
+                    {["เวลา","พนักงาน","รายการ","จำนวน","หมายเหตุ"].map(h=><th key={h} style={th_s}>{h}</th>)}
+                  </tr></thead>
+                  <tbody>
+                    {wdHistory.map((w:any)=>(
+                      <tr key={w.id} style={{borderBottom:"1px solid #f1f5f9"}}>
+                        <td style={{...td_s,fontSize:11,color:"#64748b",whiteSpace:"nowrap"}}>{w.time}</td>
+                        <td style={{...td_s,fontWeight:500}}>{w.name}</td>
+                        <td style={{...td_s}}>{w.item}</td>
+                        <td style={{...td_s,color:"#DC2626",fontWeight:600}}>-{Number(w.qty).toFixed(1)}{w.unit}</td>
+                        <td style={{...td_s,fontSize:12,color:"#64748b"}}>{w.note||"-"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        </div>
+      )}
 
       </div>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" key="cjs"></script>
