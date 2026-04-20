@@ -535,6 +535,7 @@ export default function App(){
   const [wdSearch,setWdSearch]=useState("");
   const [wdHistory,setWdHistory]=useState<any[]>(()=>{try{return JSON.parse(localStorage.getItem("cafe_wd_history")||"[]");}catch(e){return [];}});
 
+  const [rcName,setRcName]=useState("");
   const [rcItem,setRcItem]=useState("");
   const [rcQty,setRcQty]=useState<number>(0);
   const [rcNote,setRcNote]=useState("");
@@ -582,6 +583,7 @@ export default function App(){
   };
 
   const submitReceive=()=>{
+    if(!rcName.trim()){setRcMsg("❌ กรุณาระบุชื่อผู้รับของ");setTimeout(()=>setRcMsg(""),3000);return;}
     if(!rcItem){setRcMsg("❌ กรุณาเลือกวัตถุดิบ");setTimeout(()=>setRcMsg(""),3000);return;}
     if(!rcQty||rcQty<=0){setRcMsg("❌ กรุณาระบุจำนวนที่ถูกต้อง");setTimeout(()=>setRcMsg(""),3000);return;}
     const r=rms.find((x:any)=>x.id===+rcItem);
@@ -589,9 +591,10 @@ export default function App(){
     const nextStock={...stock,[r.id]:(stock[r.id]||0)+rcQty};
     setStock(nextStock);
     const now=new Date();
+    const timeStr=now.toLocaleString("th-TH");
     const updatedAt=`${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()+543} ${now.toLocaleTimeString("th-TH")}`;
     fetch("/api/stock-sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({stock:nextStock,stockMin,rms,updatedAt})}).catch(()=>{});
-    const msg=`📥 <b>รับของเข้าสต๊อก</b>\n📦 ${r.name} +${rcQty.toFixed(1)}${r.unit}\n📊 คงเหลือ: ${(nextStock[r.id]||0).toFixed(1)}${r.unit}${rcNote.trim()?`\n📝 ${rcNote.trim()}`:""}`;
+    const msg=`📥 <b>รับของเข้าสต๊อก</b>\n👤 ผู้รับ: ${rcName.trim()}\n🕐 เวลา: ${timeStr}\n📦 ${r.name} +${rcQty.toFixed(1)}${r.unit}\n📊 คงเหลือ: ${(nextStock[r.id]||0).toFixed(1)}${r.unit}${rcNote.trim()?`\n📝 ${rcNote.trim()}`:""}`;
     sendTelegram(msg);
     setRcMsg(`✅ รับ ${r.name} +${rcQty.toFixed(1)}${r.unit} เรียบร้อย`);
     setRcQty(0);
@@ -1629,6 +1632,10 @@ export default function App(){
             <div style={{background:"#fff",borderRadius:14,padding:"18px 20px",border:"1.5px solid #BFDBFE",marginBottom:16}}>
               <div style={{fontWeight:500,fontSize:14,color:"#1D4ED8",marginBottom:12}}>📥 รับของเข้าสต๊อก</div>
               <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"flex-end"}}>
+                <div style={{flex:1,minWidth:140}}>
+                  <label style={{fontSize:11,color:"#64748b",display:"block",marginBottom:4}}>ชื่อผู้รับของ *</label>
+                  <input style={inp} placeholder="ระบุชื่อ" value={rcName} onChange={e=>setRcName(e.target.value)}/>
+                </div>
                 <div style={{flex:2,minWidth:220}}>
                   <label style={{fontSize:11,color:"#64748b",display:"block",marginBottom:4}}>ค้นหาวัตถุดิบ</label>
                   <input style={{...inp,marginBottom:4}} placeholder="พิมพ์ชื่อเพื่อค้นหา..." value={rcSearch} onChange={e=>{setRcSearch(e.target.value);setRcItem("");}}/>
