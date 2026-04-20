@@ -4,11 +4,17 @@ const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL || "";
 const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || "";
 
 async function redisGet(key: string): Promise<any> {
-  const res = await fetch(`${REDIS_URL}/get/${key}`, {
-    headers: { Authorization: `Bearer ${REDIS_TOKEN}` },
+  const res = await fetch(`${REDIS_URL}/pipeline`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${REDIS_TOKEN}`, "Content-Type": "application/json" },
+    body: JSON.stringify([["GET", key]]),
   });
+  if (!res.ok) return null;
   const data = await res.json();
-  return data.result ? JSON.parse(data.result) : null;
+  const result = data[0]?.result;
+  if (!result) return null;
+  if (typeof result === "object") return result;
+  try { return JSON.parse(result); } catch { return null; }
 }
 
 async function sendTg(token: string, chatId: string, text: string) {

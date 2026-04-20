@@ -4,13 +4,13 @@ const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL || "";
 const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || "";
 
 async function redisSave(key: string, value: string) {
-  const res = await fetch(`${REDIS_URL}/set/${key}`, {
+  const res = await fetch(`${REDIS_URL}/pipeline`, {
     method: "POST",
     headers: { Authorization: `Bearer ${REDIS_TOKEN}`, "Content-Type": "application/json" },
-    body: JSON.stringify(value),
+    body: JSON.stringify([["SET", key, value]]),
   });
   const data = await res.json();
-  if (!res.ok || data.error) throw new Error(`Redis ${res.status}: ${data.error || JSON.stringify(data)}`);
+  if (!res.ok) throw new Error(`Redis ${res.status}: ${JSON.stringify(data)}`);
 }
 
 export async function POST(req: NextRequest) {
