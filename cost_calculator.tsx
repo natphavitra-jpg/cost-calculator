@@ -635,7 +635,7 @@ export default function App(){
       const res=await fetch("/api/sync-sheets",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({gsUrl,payload:buildPayload()})});
       let json:any={};
       try{json=await res.json();}catch{json={error:"ตอบกลับไม่ถูกต้อง"};}
-      setGsSyncMsg(json.error?`❌ ${json.error}`:`✅ Sync แล้ว ${new Date().toLocaleTimeString("th-TH")}`);
+      setGsSyncMsg(json.error?`❌ Sync ไม่สำเร็จ — ตรวจสอบ Apps Script URL`:`✅ Sync แล้ว ${new Date().toLocaleTimeString("th-TH")}`);
     }catch(err:any){setGsSyncMsg(`❌ เชื่อมต่อไม่ได้`);}
   };
 
