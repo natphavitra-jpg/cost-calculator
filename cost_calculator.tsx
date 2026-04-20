@@ -633,9 +633,10 @@ export default function App(){
     setGsSyncMsg("⏳ กำลัง sync...");
     try{
       const res=await fetch("/api/sync-sheets",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({gsUrl,payload:buildPayload()})});
-      const json=await res.json();
+      let json:any={};
+      try{json=await res.json();}catch{json={error:"ตอบกลับไม่ถูกต้อง"};}
       setGsSyncMsg(json.error?`❌ ${json.error}`:`✅ Sync แล้ว ${new Date().toLocaleTimeString("th-TH")}`);
-    }catch(err:any){setGsSyncMsg(`❌ ${err.message||"เชื่อมต่อไม่ได้"}`);}
+    }catch(err:any){setGsSyncMsg(`❌ เชื่อมต่อไม่ได้`);}
   };
 
   useEffect(()=>{
