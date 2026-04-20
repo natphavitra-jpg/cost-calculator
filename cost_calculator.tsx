@@ -818,14 +818,14 @@ export default function App(){
   };
 
   if(!authed) return(
-    <div style={{fontFamily:"var(--font-sans)",background:"#f8f7ff",minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center"}}>
-      <div style={{background:"#fff",borderRadius:24,padding:"40px 44px",width:340,boxShadow:"0 20px 60px rgba(127,119,221,.15)",textAlign:"center"}}>
+    <div style={{fontFamily:"var(--font-sans)",background:"#f8f7ff",minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",padding:"16px"}}>
+      <div style={{background:"#fff",borderRadius:24,padding:"36px 28px",width:"100%",maxWidth:360,boxShadow:"0 20px 60px rgba(127,119,221,.15)",textAlign:"center"}}>
         <div style={{fontSize:48,marginBottom:8}}>☕</div>
         <div style={{fontWeight:700,fontSize:20,color:"#1e1b4b",marginBottom:4}}>Simple Cafe</div>
         <div style={{fontSize:13,color:"#64748b",marginBottom:28}}>ใส่รหัสผ่านเพื่อเข้าใช้งาน</div>
         <div style={{position:"relative"}}>
-          <input autoFocus type={showPw?"text":"password"} placeholder="รหัสผ่าน"
-            style={{width:"100%",padding:"12px 44px 12px 16px",borderRadius:12,border:`2px solid ${pwError?"#ef4444":"#e2e8f0"}`,fontSize:15,boxSizing:"border-box",outline:"none",letterSpacing:showPw?1:2}}
+          <input type={showPw?"text":"password"} placeholder="รหัสผ่าน"
+            style={{width:"100%",padding:"14px 48px 14px 16px",borderRadius:12,border:`2px solid ${pwError?"#ef4444":"#e2e8f0"}`,fontSize:16,boxSizing:"border-box",outline:"none"}}
             value={pwInput}
             onChange={e=>{setPwInput(e.target.value);setPwError(false);}}
             onKeyDown={e=>{if(e.key==="Enter")handleLogin();}}
@@ -833,11 +833,11 @@ export default function App(){
           <button
             type="button"
             onClick={()=>setShowPw(v=>!v)}
-            style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",fontSize:18,color:"#94a3b8",padding:0,lineHeight:1}}
+            style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",fontSize:20,color:"#94a3b8",padding:"4px",lineHeight:1}}
           >{showPw?"🙈":"👁️"}</button>
         </div>
-        {pwError&&<div style={{color:"#ef4444",fontSize:12,marginTop:8}}>รหัสผ่านไม่ถูกต้อง</div>}
-        <button style={{marginTop:16,width:"100%",padding:"12px",borderRadius:12,border:"none",background:"#7F77DD",color:"#fff",fontSize:15,fontWeight:600,cursor:"pointer"}} onClick={handleLogin}>
+        {pwError&&<div style={{color:"#ef4444",fontSize:13,marginTop:10,fontWeight:500}}>❌ รหัสผ่านไม่ถูกต้อง</div>}
+        <button type="button" style={{marginTop:16,width:"100%",padding:"14px",borderRadius:12,border:"none",background:"#7F77DD",color:"#fff",fontSize:16,fontWeight:600,cursor:"pointer"}} onClick={handleLogin}>
           เข้าใช้งาน
         </button>
       </div>
@@ -1638,11 +1638,17 @@ export default function App(){
                 </div>
                 <div style={{flex:2,minWidth:220}}>
                   <label style={{fontSize:11,color:"#64748b",display:"block",marginBottom:4}}>ค้นหาวัตถุดิบ</label>
-                  <input style={{...inp,marginBottom:4}} placeholder="พิมพ์ชื่อเพื่อค้นหา..." value={rcSearch} onChange={e=>{setRcSearch(e.target.value);setRcItem("");}}/>
+                  <input style={{...inp,marginBottom:4}} placeholder="พิมพ์ชื่อเพื่อกรอง..." value={rcSearch} onChange={e=>{
+                    const v=e.target.value;setRcSearch(v);
+                    const filtered=rms.filter((r:any)=>!v||r.name.toLowerCase().includes(v.toLowerCase())||r.cat.includes(v));
+                    if(filtered.length===1)setRcItem(String(filtered[0].id));
+                    else if(v==="")setRcItem("");
+                  }}/>
                   <select style={inp as any} value={rcItem} onChange={e=>setRcItem(e.target.value)}>
                     <option value="">-- เลือกวัตถุดิบ --</option>
                     {rms.filter((r:any)=>!rcSearch||r.name.toLowerCase().includes(rcSearch.toLowerCase())||r.cat.includes(rcSearch)).map((r:any)=><option key={r.id} value={r.id}>{r.name} (มี {(stock[r.id]||0).toFixed(1)}{r.unit})</option>)}
                   </select>
+                  {rcItem&&<div style={{fontSize:11,color:"#1D4ED8",marginTop:4}}>✓ เลือก: {rms.find((r:any)=>r.id===+rcItem)?.name}</div>}
                 </div>
                 <div style={{flex:1,minWidth:100}}>
                   <label style={{fontSize:11,color:"#64748b",display:"block",marginBottom:4}}>จำนวนที่รับ</label>
@@ -1756,11 +1762,17 @@ export default function App(){
             </div>
             <div style={{marginBottom:12}}>
               <label style={{fontSize:12,color:"#64748b",display:"block",marginBottom:4}}>วัตถุดิบ *</label>
-              <input style={{...inp,marginBottom:6}} placeholder="🔍 ค้นหาวัตถุดิบ..." value={wdSearch} onChange={e=>{setWdSearch(e.target.value);setWdItem("");}}/>
+              <input style={{...inp,marginBottom:6}} placeholder="🔍 พิมพ์ชื่อเพื่อกรอง..." value={wdSearch} onChange={e=>{
+                const v=e.target.value;setWdSearch(v);
+                const filtered=rms.filter((r:any)=>!v||r.name.toLowerCase().includes(v.toLowerCase())||r.cat.includes(v));
+                if(filtered.length===1)setWdItem(String(filtered[0].id));
+                else if(v==="")setWdItem("");
+              }}/>
               <select style={inp as any} value={wdItem} onChange={e=>setWdItem(e.target.value)}>
                 <option value="">-- เลือกวัตถุดิบ --</option>
                 {rms.filter((r:any)=>!wdSearch||r.name.toLowerCase().includes(wdSearch.toLowerCase())||r.cat.includes(wdSearch)).map((r:any)=><option key={r.id} value={r.id}>{r.name} (คงเหลือ {(stock[r.id]||0).toFixed(1)}{r.unit})</option>)}
               </select>
+              {wdItem&&<div style={{fontSize:11,color:"#0F6E56",marginTop:4}}>✓ เลือก: {rms.find((r:any)=>r.id===+wdItem)?.name}</div>}
             </div>
             <div style={{marginBottom:12,display:"flex",gap:12,alignItems:"flex-end"}}>
               <div style={{flex:1}}>
