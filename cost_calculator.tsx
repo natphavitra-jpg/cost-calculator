@@ -555,6 +555,7 @@ export default function App(){
 
     const updatedAt=`${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()+543} ${now.toLocaleTimeString("th-TH")}`;
     fetch("/api/stock-sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({stock:nextStock,stockMin,rms,updatedAt})}).catch(()=>{});
+    fetch("/api/withdrawal-log",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(entry)}).catch(()=>{});
 
     const remain=nextStock[r.id]||0;
     const isOut=remain<=0;

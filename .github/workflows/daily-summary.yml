@@ -1,0 +1,13 @@
+name: Daily Summary 19:00
+
+on:
+  schedule:
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+
+jobs:
+  summary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Daily Summary to Telegram
+        run: curl -s "https://cost-calculator-rho.vercel.app/api/daily-summary"
