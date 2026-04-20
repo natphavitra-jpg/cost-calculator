@@ -848,7 +848,7 @@ export default function App(){
     <div style={{fontFamily:"var(--font-sans)",background:"#f8f7ff",minHeight:"100vh",padding:"0 0 3rem"}}>
       <div className="app-header" style={{background:tc.color,padding:"18px 24px 0",transition:"background .3s"}}>
         <div style={{maxWidth:1160,margin:"0 auto"}}>
-          <div className="header-top-row" style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+          <div className="header-top-row" style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12,flexWrap:"wrap",gap:8}}>
             <div style={{display:"flex",alignItems:"center",gap:10}}>
               <div style={{width:36,height:36,borderRadius:10,background:"rgba(255,255,255,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>☕</div>
               <div>
@@ -903,10 +903,10 @@ export default function App(){
               <a href="https://script.google.com" target="_blank" rel="noreferrer" style={{padding:"8px 16px",borderRadius:9,background:"rgba(255,255,255,.15)",border:"1.5px solid rgba(255,255,255,.3)",color:"#fff",cursor:"pointer",fontSize:12,textDecoration:"none"}}>เปิด Apps Script ↗</a>
             </div>
           )}
-          <div style={{display:"flex",gap:2,overflowX:"auto"}}>
+          <div className="top-tabs-bar" style={{display:"flex",gap:2,overflowX:"auto"}}>
             {TABS.map(t=>(
               <button key={t.id} onClick={()=>setTab(t.id)} style={{display:"flex",alignItems:"center",gap:6,padding:"10px 14px",border:"none",background:tab===t.id?"#fff":"transparent",color:tab===t.id?tc.color:"rgba(255,255,255,.8)",cursor:"pointer",fontSize:13,fontWeight:tab===t.id?500:400,borderRadius:"8px 8px 0 0",transition:"all .15s",whiteSpace:"nowrap"}}>
-                <span style={{fontSize:14}}>{t.emoji}</span><span className="tab-label">{t.label}</span>
+                <span style={{fontSize:14}}>{t.emoji}</span><span>{t.label}</span>
               </button>
             ))}
           </div>
@@ -1615,7 +1615,7 @@ export default function App(){
         const alreadyDeducted=!!stockDeducted[stockDate];
         return(
           <div>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16,flexWrap:"wrap",gap:12}}>
+            <div className="stock-header-row" style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16,flexWrap:"wrap",gap:12}}>
               <div>
                 <div style={{fontWeight:500,fontSize:15,color:"#0F6E56"}}>📦 จัดการสต๊อกวัตถุดิบ</div>
                 <div style={{fontSize:12,color:"#64748b",marginTop:2}}>ตั้งจำนวนสต๊อก → ยืนยันยอดขาย → ระบบตัดสต๊อกอัตโนมัติ</div>
@@ -1631,7 +1631,7 @@ export default function App(){
             {/* รับของเข้าสต๊อก */}
             <div style={{background:"#fff",borderRadius:14,padding:"18px 20px",border:"1.5px solid #BFDBFE",marginBottom:16}}>
               <div style={{fontWeight:500,fontSize:14,color:"#1D4ED8",marginBottom:12}}>📥 รับของเข้าสต๊อก</div>
-              <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"flex-end"}}>
+              <div className="rc-form-row" style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"flex-end"}}>
                 <div style={{flex:1,minWidth:140}}>
                   <label style={{fontSize:11,color:"#64748b",display:"block",marginBottom:4}}>ชื่อผู้รับของ *</label>
                   <input style={inp} placeholder="ระบุชื่อ" value={rcName} onChange={e=>setRcName(e.target.value)}/>
@@ -1812,8 +1812,22 @@ export default function App(){
       )}
 
       </div>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" key="cjs"></script>
 
+      {/* Mobile bottom navigation */}
+      <nav className="bottom-nav">
+        <div className="bottom-nav-inner">
+          {TABS.map(t=>(
+            <button key={t.id} className={`bottom-nav-btn${tab===t.id?" active":""}`}
+              style={{"--tab-color":t.color} as any}
+              onClick={()=>setTab(t.id)}>
+              <span className="bnav-emoji">{t.emoji}</span>
+              <span className="bnav-label">{t.label}</span>
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" key="cjs"></script>
     </div>
   );
 }
