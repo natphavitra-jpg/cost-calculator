@@ -1690,7 +1690,8 @@ export default function App(){
                   </div>
                   <div style={{display:"flex",gap:8}}>
                     <button style={{padding:"7px 16px",borderRadius:8,background:"#0369A1",border:"none",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:600}} onClick={confirmImport}>
-                      ✅ ยืนยัน Import ทั้งหมด {importItems.length} รายการ
+                      ✅ นำเข้าทั้งหมด {importItems.length} รายการ
+                      (อัพเดท {importItems.filter((i:any)=>i.rmId).length} + สร้างใหม่ {importItems.filter((i:any)=>!i.rmId).length})
                     </button>
                     <button style={{padding:"7px 14px",borderRadius:8,background:"#f1f5f9",border:"none",color:"#64748b",cursor:"pointer",fontSize:13}} onClick={()=>{setImportState("idle");setImportItems([]);}}>ยกเลิก</button>
                   </div>
