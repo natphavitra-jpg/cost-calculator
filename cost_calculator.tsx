@@ -936,6 +936,15 @@ export default function App(){
                 }catch(e:any){setTgMsg(`❌ Network error: ${e.message}`);}
                 setTimeout(()=>setTgMsg(""),4000);
               }}>📤 ทดสอบส่ง</button>
+              <button style={{padding:"8px 16px",borderRadius:9,background:"#534AB7",border:"none",color:"#fff",cursor:"pointer",fontSize:12,fontWeight:500}} onClick={async()=>{
+                setTgMsg("⏳ กำลังลงทะเบียน Webhook...");
+                try{
+                  const r=await fetch("/api/telegram-setup");
+                  const d=await r.json();
+                  setTgMsg(d.telegram?.ok?"✅ Webhook ลงทะเบียนแล้ว Bot พร้อมรับคำสั่ง":`❌ ${d.telegram?.description||d.error||"ลงทะเบียนไม่สำเร็จ"}`);
+                }catch(e:any){setTgMsg(`❌ ${e.message}`);}
+                setTimeout(()=>setTgMsg(""),6000);
+              }}>🔗 Register Webhook</button>
             </div>
           )}
           {showGsSettings&&(
