@@ -25,6 +25,22 @@ async function sendTg(token: string, chatId: string, text: string) {
   });
 }
 
+// Split into ≤3900-char chunks and send sequentially
+async function sendTgChunked(token: string, chatId: string, lines: string[]) {
+  const LIMIT = 3900;
+  let chunk = "";
+  for (const line of lines) {
+    const next = chunk ? chunk + "\n" + line : line;
+    if (next.length > LIMIT) {
+      if (chunk) await sendTg(token, chatId, chunk);
+      chunk = line;
+    } else {
+      chunk = next;
+    }
+  }
+  if (chunk) await sendTg(token, chatId, chunk);
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -45,16 +61,37 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ ok: true });
       }
       const { stock, stockMin, rms, updatedAt } = data;
-      const lines: string[] = [`📦 <b>สต๊อกปัจจุบัน</b>\nอัพเดต: ${updatedAt}\n`];
-      rms.forEach((r: any) => {
+      // Only show items that have a minimum level configured (avoids 489-item flood)
+      const tracked = (rms as any[]).filter((r: any) => (stockMin[r.id] || 0) > 0);
+      if (!tracked.length) {
+        await sendTg(token, chatId, "ℹ️ ยังไม่มีรายการที่ตั้งขั้นต่ำไว้\nกรุณาตั้งค่าขั้นต่ำในแอปก่อน");
+        return NextResponse.json({ ok: true });
+      }
+      const lines: string[] = [`📦 <b>สต๊อกที่ตั้งขั้นต่ำ (${tracked.length} รายการ)</b>\nอัพเดต: ${updatedAt}\n`];
+      tracked.forEach((r: any) => {
+        const cur = stock[r.id] || 0;
+        const min = stockMin[r.id] || 0;
+        const status = cur <= 0 ? "🚨" : cur < min ? "⚠️" : "✅";
+        lines.push(`${status} ${r.name}: ${cur.toFixed(1)}${r.unit} (ขั้นต่ำ ${min}${r.unit})`);
+      });
+      await sendTgChunked(token, chatId, lines);
+
+    } else if (text === "สต๊อกทั้งหมด" || text === "ทั้งหมด" || text === "all") {
+      if (!data) {
+        await sendTg(token, chatId, "⚠️ ยังไม่มีข้อมูลสต๊อก");
+        return NextResponse.json({ ok: true });
+      }
+      const { stock, stockMin, rms, updatedAt } = data;
+      const lines: string[] = [`📦 <b>สต๊อกทั้งหมด</b>\nอัพเดต: ${updatedAt}\n`];
+      (rms as any[]).forEach((r: any) => {
         const cur = stock[r.id] || 0;
         const min = stockMin[r.id] || 0;
         if (cur > 0 || min > 0) {
-          const status = min > 0 ? (cur <= 0 ? "🚨" : cur < min ? "⚠️" : "✅") : "";
+          const status = min > 0 ? (cur <= 0 ? "🚨" : cur < min ? "⚠️" : "✅") : "📦";
           lines.push(`${status} ${r.name}: ${cur.toFixed(1)}${r.unit}${min > 0 ? ` (ขั้นต่ำ ${min})` : ""}`);
         }
       });
-      await sendTg(token, chatId, lines.join("\n"));
+      await sendTgChunked(token, chatId, lines);
 
     } else if (text === "สต๊อกต่ำ" || text === "ต่ำ" || text === "low") {
       if (!data) {
@@ -62,7 +99,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ ok: true });
       }
       const { stock, stockMin, rms } = data;
-      const low = rms.filter((r: any) => stockMin[r.id] && (stock[r.id] || 0) < stockMin[r.id]);
+      const low = (rms as any[]).filter((r: any) => stockMin[r.id] && (stock[r.id] || 0) < stockMin[r.id]);
       if (!low.length) {
         await sendTg(token, chatId, "✅ สต๊อกทุกรายการอยู่ในระดับปกติ");
       } else {
@@ -72,7 +109,7 @@ export async function POST(req: NextRequest) {
           const icon = cur <= 0 ? "🚨" : "⚠️";
           lines.push(`${icon} ${r.name}: ${cur.toFixed(1)}${r.unit} / ขั้นต่ำ ${stockMin[r.id]}${r.unit}`);
         });
-        await sendTg(token, chatId, lines.join("\n"));
+        await sendTgChunked(token, chatId, lines);
       }
 
     } else if (text === "/getchatid") {
@@ -81,7 +118,8 @@ export async function POST(req: NextRequest) {
     } else if (text === "help" || text === "ช่วยเหลือ" || text === "/start") {
       await sendTg(token, chatId,
         "☕ <b>Simple Cafe Alert Bot</b>\n\nคำสั่งที่ใช้ได้:\n" +
-        "📦 <b>สต๊อก</b> — ดูสต๊อกทั้งหมด\n" +
+        "📦 <b>สต๊อก</b> — ดูรายการที่ตั้งขั้นต่ำไว้\n" +
+        "📋 <b>สต๊อกทั้งหมด</b> — ดูสต๊อกทุกรายการ\n" +
         "⚠️ <b>สต๊อกต่ำ</b> — ดูเฉพาะที่ต่ำหรือหมด\n" +
         "❓ <b>help</b> — แสดงคำสั่ง\n\n" +
         "ระบบจะแจ้งเตือนอัตโนมัติเมื่อตัดสต๊อก"
