@@ -563,17 +563,11 @@ export default function App(){
     try{localStorage.setItem("cafe_wd_history",JSON.stringify(newHistory));}catch(e){}
 
     const updatedAt=`${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()+543} ${now.toLocaleTimeString("th-TH")}`;
-    fetch("/api/stock-sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({stock:nextStock,stockMin,rms,updatedAt})}).catch(()=>{});
-    fetch("/api/withdrawal-log",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(entry)}).catch(()=>{});
-
     const remain=nextStock[r.id]||0;
-    const isOut=remain<=0;
-    const isLow=stockMin[r.id]&&remain<stockMin[r.id]&&remain>0;
-    let msg=`📋 <b>เบิกของ</b>\n👤 พนักงาน: ${wdName.trim()}\n🕐 เวลา: ${timeStr}\n📦 รายการ: ${r.name} -${wdQty.toFixed(1)}${r.unit}\n📊 คงเหลือ: ${remain.toFixed(1)}${r.unit}`;
-    if(isOut) msg+=` 🚨 หมดแล้ว!`;
-    else if(isLow) msg+=` ⚠️ ต่ำกว่าขั้นต่ำ`;
-    if(wdNote.trim()) msg+=`\n📝 หมายเหตุ: ${wdNote.trim()}`;
-    sendTelegram(msg);
+    const isLow=!!(stockMin[r.id]&&remain<stockMin[r.id]&&remain>0);
+    const entryWithMeta={...entry,remainAfter:remain,isLow};
+    fetch("/api/stock-sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({stock:nextStock,stockMin,rms,updatedAt})}).catch(()=>{});
+    fetch("/api/withdrawal-log",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(entryWithMeta)}).catch(()=>{});
 
     setWdMsg(`✅ เบิก ${r.name} ${wdQty.toFixed(1)}${r.unit} เรียบร้อย`);
     setWdQty(0);
@@ -593,9 +587,7 @@ export default function App(){
     const now=new Date();
     const timeStr=now.toLocaleString("th-TH");
     const updatedAt=`${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()+543} ${now.toLocaleTimeString("th-TH")}`;
-    fetch("/api/stock-sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({stock:nextStock,stockMin,rms,updatedAt})}).catch(()=>{});
-    const msg=`📥 <b>รับของเข้าสต๊อก</b>\n👤 ผู้รับ: ${rcName.trim()}\n🕐 เวลา: ${timeStr}\n📦 ${r.name} +${rcQty.toFixed(1)}${r.unit}\n📊 คงเหลือ: ${(nextStock[r.id]||0).toFixed(1)}${r.unit}${rcNote.trim()?`\n📝 ${rcNote.trim()}`:""}`;
-    sendTelegram(msg);
+    fetch("/api/stock-receive",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:rcName.trim(),item:r.name,qty:rcQty,unit:r.unit,remainAfter:nextStock[r.id]||0,note:rcNote.trim(),time:timeStr,stock:nextStock,stockMin,rms,updatedAt})}).catch(()=>{});
     setRcMsg(`✅ รับ ${r.name} +${rcQty.toFixed(1)}${r.unit} เรียบร้อย`);
     setRcQty(0);
     setRcNote("");
