@@ -595,6 +595,37 @@ export default function App(){
     setTimeout(()=>setRcMsg(""),4000);
   };
 
+  const loadImport=async()=>{
+    setImportState("loading");setImportMsg("");
+    try{
+      const res=await fetch("/api/import-appsheet");
+      const data=await res.json();
+      if(data.error){setImportMsg(`❌ ${data.error}`);setImportState("idle");return;}
+      const matched=data.items.map((item:any)=>{
+        const norm=(s:string)=>s.toLowerCase().replace(/\s+/g,"");
+        const exact=rms.find((r:any)=>norm(r.name)===norm(item.name));
+        const partial=!exact&&rms.find((r:any)=>norm(r.name).includes(norm(item.name))||norm(item.name).includes(norm(r.name)));
+        const found=exact||partial||null;
+        return{...item,rmId:found?found.id:null,rmName:found?found.name:""};
+      });
+      setImportItems(matched);setImportState("preview");
+    }catch(e:any){setImportMsg(`❌ ${e.message}`);setImportState("idle");}
+  };
+
+  const confirmImport=()=>{
+    const toUpdate=importItems.filter(i=>i.rmId!==null);
+    if(!toUpdate.length){setImportMsg("❌ ไม่มีรายการที่จับคู่ได้");return;}
+    const nextStock={...stock};
+    toUpdate.forEach(i=>{nextStock[i.rmId!]=i.qty;});
+    setStock(nextStock);
+    const now=new Date();
+    const updatedAt=`${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()+543} ${now.toLocaleTimeString("th-TH")}`;
+    fetch("/api/stock-sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({stock:nextStock,stockMin,rms,updatedAt})}).catch(()=>{});
+    setImportState("idle");setImportItems([]);
+    setImportMsg(`✅ Import สำเร็จ ${toUpdate.length} รายการ`);
+    setTimeout(()=>setImportMsg(""),5000);
+  };
+
   const [selectedDate,setSelectedDate]=useState(todayKey);
   const [viewMonth,setViewMonth]=useState(toMonthKey(today));
   const [historyView,setHistoryView]=useState("month");
@@ -618,6 +649,9 @@ export default function App(){
   const [stockCatF,setStockCatF]=useState("ทั้งหมด");
   const [editStockId,setEditStockId]=useState(null);
   const [addAmt,setAddAmt]=useState(0);
+  const [importState,setImportState]=useState<"idle"|"loading"|"preview">("idle");
+  const [importItems,setImportItems]=useState<{name:string;unit:string;qty:number;rmId:number|null;rmName:string}[]>([]);
+  const [importMsg,setImportMsg]=useState("");
   const [rmSearch,setRmSearch]=useState("");
   const [compRmSearch,setCompRmSearch]=useState("");
   const [pdfLoading,setPdfLoading]=useState(false);
@@ -1617,8 +1651,49 @@ export default function App(){
                 {outCount>0&&<div style={{background:"#FEE2E2",color:"#991b1b",padding:"6px 14px",borderRadius:20,fontSize:12,fontWeight:500}}>🔴 หมดแล้ว {outCount} รายการ</div>}
                 <button style={{padding:"6px 14px",borderRadius:20,background:"#E1F5EE",border:"1.5px solid #9FE1CB",color:"#0F6E56",fontSize:12,cursor:"pointer",fontWeight:500}} onClick={()=>{syncStockToRedis(true);}}>📤 Sync สต๊อก → Bot</button>
                 {lastRedisSync&&<div style={{fontSize:11,color:"#94a3b8"}}>🔄 {lastRedisSync}</div>}
+                <button style={{padding:"6px 14px",borderRadius:20,background:"#F0F9FF",border:"1.5px solid #BAE6FD",color:"#0369A1",fontSize:12,cursor:"pointer",fontWeight:500}} onClick={loadImport} disabled={importState==="loading"}>
+                  {importState==="loading"?"⏳ กำลังโหลด...":"📲 Import จาก AppSheet"}
+                </button>
               </div>
             </div>
+
+            {importMsg&&<div style={{marginBottom:12,padding:"10px 16px",borderRadius:10,background:importMsg.startsWith("✅")?"#F0FDF4":"#FEF2F2",color:importMsg.startsWith("✅")?"#065F46":"#991B1B",fontSize:13,fontWeight:500}}>{importMsg}</div>}
+
+            {/* Import Preview */}
+            {importState==="preview"&&importItems.length>0&&(
+              <div style={{background:"#fff",borderRadius:14,border:"1.5px solid #BAE6FD",marginBottom:16,overflow:"hidden"}}>
+                <div style={{padding:"14px 20px",borderBottom:"1px solid #E0F2FE",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
+                  <div>
+                    <span style={{fontWeight:600,fontSize:14,color:"#0369A1"}}>📲 ข้อมูลจาก AppSheet ({importItems.length} รายการ)</span>
+                    <span style={{marginLeft:12,fontSize:12,color:"#0F6E56"}}>✅ จับคู่ได้ {importItems.filter(i=>i.rmId).length}</span>
+                    <span style={{marginLeft:8,fontSize:12,color:"#DC2626"}}>❌ ไม่พบ {importItems.filter(i=>!i.rmId).length}</span>
+                  </div>
+                  <div style={{display:"flex",gap:8}}>
+                    <button style={{padding:"7px 16px",borderRadius:8,background:"#0369A1",border:"none",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:600}} onClick={confirmImport}>
+                      ✅ ยืนยัน Import {importItems.filter(i=>i.rmId).length} รายการ
+                    </button>
+                    <button style={{padding:"7px 14px",borderRadius:8,background:"#f1f5f9",border:"none",color:"#64748b",cursor:"pointer",fontSize:13}} onClick={()=>{setImportState("idle");setImportItems([]);}}>ยกเลิก</button>
+                  </div>
+                </div>
+                <div style={{overflowX:"auto",maxHeight:320,overflowY:"auto"}}>
+                  <table style={{width:"100%",borderCollapse:"collapse",minWidth:480}}>
+                    <thead><tr style={{background:"#F0F9FF",position:"sticky",top:0}}>
+                      {["ชื่อใน AppSheet","จับคู่กับ","จำนวนใหม่","สถานะ"].map(h=><th key={h} style={{padding:"8px 14px",textAlign:"left",fontSize:11,color:"#0369A1",fontWeight:600,borderBottom:"1px solid #BAE6FD"}}>{h}</th>)}
+                    </tr></thead>
+                    <tbody>
+                      {importItems.map((item,i)=>(
+                        <tr key={i} style={{borderBottom:"1px solid #f8fafc",background:item.rmId?"#fff":"#FEF9F9"}}>
+                          <td style={{padding:"8px 14px",fontSize:13}}>{item.name}</td>
+                          <td style={{padding:"8px 14px",fontSize:13,color:item.rmId?"#1e293b":"#DC2626"}}>{item.rmId?item.rmName:"— ไม่พบในระบบ"}</td>
+                          <td style={{padding:"8px 14px",fontSize:13,fontWeight:500,color:"#0369A1"}}>{item.qty.toFixed(1)} {item.unit}</td>
+                          <td style={{padding:"8px 14px",fontSize:13}}>{item.rmId?"✅":"❌"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
 
             {/* รับของเข้าสต๊อก */}
             <div style={{background:"#fff",borderRadius:14,padding:"18px 20px",border:"1.5px solid #BFDBFE",marginBottom:16}}>
