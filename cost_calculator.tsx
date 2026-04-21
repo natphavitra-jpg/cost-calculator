@@ -601,10 +601,18 @@ export default function App(){
       const res=await fetch("/api/import-appsheet");
       const data=await res.json();
       if(data.error){setImportMsg(`❌ ${data.error}`);setImportState("idle");return;}
+      const norm=(s:string)=>s.toLowerCase()
+        .replace(/\s+/g,"")
+        .replace(/\(.*?\)/g,"")
+        .replace(/(แพ็ค|แพค|ถุง|กล่อง|ขวด|ชิ้น|ห่อ|แผ่น|แพ|ออน|กก|kg|ml|g|ใบ|อัน|ชุด)/g,"")
+        .replace(/[0-9]+/g,"");
       const matched=data.items.map((item:any)=>{
-        const norm=(s:string)=>s.toLowerCase().replace(/\s+/g,"");
-        const exact=rms.find((r:any)=>norm(r.name)===norm(item.name));
-        const partial=!exact&&rms.find((r:any)=>norm(r.name).includes(norm(item.name))||norm(item.name).includes(norm(r.name)));
+        const nItem=norm(item.name);
+        const exact=rms.find((r:any)=>norm(r.name)===nItem);
+        const partial=!exact&&rms.find((r:any)=>{
+          const nR=norm(r.name);
+          return nR===nItem||nR.includes(nItem)||nItem.includes(nR);
+        });
         const found=exact||partial||null;
         return{...item,rmId:found?found.id:null,rmName:found?found.name:""};
       });
@@ -613,17 +621,29 @@ export default function App(){
   };
 
   const confirmImport=()=>{
-    const toUpdate=importItems.filter(i=>i.rmId!==null);
-    if(!toUpdate.length){setImportMsg("❌ ไม่มีรายการที่จับคู่ได้");return;}
+    const matched=importItems.filter(i=>i.rmId!==null);
+    const unmatched=importItems.filter(i=>i.rmId===null);
     const nextStock={...stock};
-    toUpdate.forEach(i=>{nextStock[i.rmId!]=i.qty;});
+    matched.forEach(i=>{nextStock[i.rmId!]=i.qty;});
+
+    // Create new raw materials for unmatched items
+    let nextId=Math.max(...rms.map((r:any)=>r.id),0)+1;
+    const newRms:any[]=unmatched.map(i=>{
+      const id=nextId++;
+      nextStock[id]=i.qty;
+      return{id,name:i.name,unit:i.unit||"หน่วย",pricePerPack:0,packSize:1,cat:"นำเข้า"};
+    });
+    if(newRms.length>0){
+      setBranches((prev:any)=>prev.map((b:any,idx:number)=>idx===0?{...b,rms:[...b.rms,...newRms]}:b));
+    }
     setStock(nextStock);
     const now=new Date();
     const updatedAt=`${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()+543} ${now.toLocaleTimeString("th-TH")}`;
-    fetch("/api/stock-sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({stock:nextStock,stockMin,rms,updatedAt})}).catch(()=>{});
+    const allRms=[...rms,...newRms];
+    fetch("/api/stock-sync",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({stock:nextStock,stockMin,rms:allRms,updatedAt})}).catch(()=>{});
     setImportState("idle");setImportItems([]);
-    setImportMsg(`✅ Import สำเร็จ ${toUpdate.length} รายการ`);
-    setTimeout(()=>setImportMsg(""),5000);
+    setImportMsg(`✅ Import สำเร็จ: อัพเดท ${matched.length} รายการ + เพิ่มใหม่ ${newRms.length} รายการ`);
+    setTimeout(()=>setImportMsg(""),8000);
   };
 
   const [selectedDate,setSelectedDate]=useState(todayKey);
@@ -1670,7 +1690,7 @@ export default function App(){
                   </div>
                   <div style={{display:"flex",gap:8}}>
                     <button style={{padding:"7px 16px",borderRadius:8,background:"#0369A1",border:"none",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:600}} onClick={confirmImport}>
-                      ✅ ยืนยัน Import {importItems.filter(i=>i.rmId).length} รายการ
+                      ✅ ยืนยัน Import ทั้งหมด {importItems.length} รายการ
                     </button>
                     <button style={{padding:"7px 14px",borderRadius:8,background:"#f1f5f9",border:"none",color:"#64748b",cursor:"pointer",fontSize:13}} onClick={()=>{setImportState("idle");setImportItems([]);}}>ยกเลิก</button>
                   </div>
